@@ -1,0 +1,31 @@
+- new file needs to insert a new blockrequest
+
+- old file needs to reset its timer in blockrequest
+
+- filemanager needs to emit a signal whenever a blockrequest's timer dies
+- netsocket needs to listen for this signal and resend the request
+
+- fix all bytearrays
+
+- new search request from UI needs to start searchreqest
+- when the timer dies, hopLimit etc. needs to be updated
+
+- needs to be a function that deals with propogating fileSearch
+- file search needs to propage correctly
+
+- searchrequest needs emit a message when new downloads are available
+- UI needs to be listening for the message and update downloads when available
+
+- UI needs a window of available downloads (wait for ennan's response)
+
+DEVIATIONS FROM SPEC
+
+Instead of maintaining local peer connections via hardcoded peers that are "dead"
+Every time a new Peerster instance starts up it pings the 3 neighbors with a WANT message
+The WANT message creates a new peer, because you obtain enough information to get
+a unique place to send the messages.
+
+USEFUL COMMANDS
+
+netstat -anp | grep "peerster"
+netstat -anp | grep "udp"
