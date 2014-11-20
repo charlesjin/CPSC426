@@ -34,6 +34,10 @@ public slots:
 	void showSearchResults(QString searchTerms);
 	void searchItemClicked(QListWidgetItem* item);
 	void gotSearchResult(QString fileName);
+	void clickedShareSecret();
+	void newSecret(qint32);
+	void clickedRecoverSecret();
+	void secretClicked(QListWidgetItem* secret);
 
 signals:
   void sendMessage(QMap<QString, QVariant> map);
@@ -43,13 +47,15 @@ signals:
   void newFileRequest(QMap<QString, QVariant> map);
   void showSearchResult(QString fileName);
   void newFileRequestFromSearch(QMap<QString, QVariant> map);
+  void shareSecret(qint32);
+  void recoverSecret(QString);
 
 private:
 	QTextEdit *textview;
 	QTextEdit *textedit;
 	QListWidget *peerview;
 	QPushButton *button;
-
+  QStringList *secretList;
 };
 
 class TextEdit : public QTextEdit
@@ -142,6 +148,41 @@ private:
 	QLineEdit *textLine;
 	QString origin;
 
+};
+
+class ShareSecretDialog : public QDialog
+{
+  Q_OBJECT
+  
+public:
+  ShareSecretDialog();
+
+public slots:
+  void gotReturnPressed();
+  
+signals:
+  void enteredSecret(qint32 secret);
+
+private:
+  QLineEdit *secretLine;
+  
+};
+
+class RecoverSecretDialog : public QDialog
+{
+  Q_OBJECT
+  
+public:
+  RecoverSecretDialog(QStringList secretList);
+  QListWidget *secretview;
+
+public slots:
+  void closeDialog();
+  
+signals:
+
+private:
+  
 };
 
 #endif // PEERSTER_MAIN_HH

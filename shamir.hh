@@ -12,7 +12,7 @@ class ShamirSecret : public QObject
 public:
 	static QList<QPair<qint16, qint64> > generateSecrets(qint32 secret, qint16 noPlayers, quint16 threshold);
 	static qint32 solveSecret(QList<QPair<qint16, qint64> > points);
-
+  
 private:
 	ShamirSecret();
 	~ShamirSecret();

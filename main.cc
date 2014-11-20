@@ -74,11 +74,30 @@ ChatDialog::ChatDialog()
 	QHBoxLayout *fileLayout = new QHBoxLayout();
 	fileLayout->addWidget(uploadFileButton);
 	fileLayout->addWidget(downloadFileButton);
+	
+	// secret share
+  QPushButton *shareSecretButton = new QPushButton("Share Secret", this);
+  shareSecretButton->setAutoDefault(false);
+  shareSecretButton->setDefault(false);
+  connect(shareSecretButton, SIGNAL(clicked()),
+    this, SLOT(clickedShareSecret()));
+
+  QPushButton *recoverSecretButton = new QPushButton("Reconstruct Secret", this);
+  recoverSecretButton->setAutoDefault(false);
+  recoverSecretButton->setDefault(false);
+  connect(recoverSecretButton, SIGNAL(clicked()),
+    this, SLOT(clickedRecoverSecret()));  
+  secretList = new QStringList();
+    
+	QHBoxLayout *secretLayout = new QHBoxLayout();
+	secretLayout->addWidget(shareSecretButton);
+	secretLayout->addWidget(recoverSecretButton);
 
 	QVBoxLayout *chatLayout = new QVBoxLayout();
 	chatLayout->addWidget(textview);
 	chatLayout->addWidget(textedit);
 	chatLayout->addLayout(fileLayout);
+	chatLayout->addLayout(secretLayout);
 
 	QHBoxLayout *layout = new QHBoxLayout();
 	layout->addLayout(peerLayout, 1);
@@ -201,6 +220,46 @@ void ChatDialog::searchItemClicked(QListWidgetItem* item)
 	QMap<QString, QVariant> map;
 	map.insert("fileName", item->text());
 	emit newFileRequestFromSearch(map);
+}
+
+void ChatDialog::clickedShareSecret()
+{
+  ShareSecretDialog *shareSecretDialog = new ShareSecretDialog();
+
+  connect(shareSecretDialog, SIGNAL(enteredSecret(qint32)), 
+    this, SLOT(newSecret(qint32)));
+
+  shareSecretDialog->exec();
+}
+
+void ChatDialog::newSecret(qint32 secret) // KAYO
+{
+  // Share the secret stored in the variable "secret"
+  
+  emit shareSecret(secret); // This signal isn't being used by anything
+                            // Feel free to delete if you don't use it
+}
+
+void ChatDialog::clickedRecoverSecret()
+{
+  RecoverSecretDialog *recoverSecretDialog = new RecoverSecretDialog(*secretList);
+  
+  connect(recoverSecretDialog->secretview, SIGNAL(itemClicked(QListWidgetItem*)),
+    this, SLOT(secretClicked(QListWidgetItem*)));
+  
+  recoverSecretDialog->exec();
+}
+
+void ChatDialog::secretClicked(QListWidgetItem* item) // KAYO
+{
+  // Reconstruct the secret corresponding to item->text()
+  
+  // If you want to make a secret available to the user for
+  // reconstruction, add it to the QStringList *secretList.
+  // e.g. *secretList << "secret 1";
+  
+  emit recoverSecret(item->text()); // This signal also isn't being used.
+                                    // Please delete if you don't use it.
 }
 
 /*****************************/
@@ -364,7 +423,6 @@ void FileDialog::searchReturnPressed()
 	}
 }
 
-
 /*****************************/
 /*													 */
 /*      Direct Message       */
@@ -401,6 +459,64 @@ void DMDialog::gotReturnPressed()
 		emit newDirectMessage(map);
 		this->close();
 	}
+}
+
+/*****************************/
+/*													 */
+/*    Share Secret Dialog    */
+/*													 */
+/*****************************/
+
+ShareSecretDialog::ShareSecretDialog()
+{
+  setWindowTitle("Share Secret");
+  secretLine = new QLineEdit();
+  secretLine->setPlaceholderText("Enter secret");
+  
+  QVBoxLayout *shareSecretLayout = new QVBoxLayout();
+  shareSecretLayout->addWidget(secretLine);
+  setLayout(shareSecretLayout);
+  
+  connect(secretLine, SIGNAL(returnPressed()),
+    this, SLOT(gotReturnPressed()));
+}
+
+void ShareSecretDialog::gotReturnPressed()
+{
+  QString secret = secretLine->text();
+  emit enteredSecret(secret.toInt());
+  close();
+}
+
+/*****************************/
+/*													 */
+/*   Recover Secret Dialog   */
+/*													 */
+/*****************************/
+
+RecoverSecretDialog::RecoverSecretDialog(QStringList secretList)
+{
+  setWindowTitle("Reconstruct Secret");
+	secretview = new QListWidget(this);
+	secretview->setMinimumWidth(300);
+	secretview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	secretview->addItems(secretList);
+
+	QLabel *text = new QLabel(this);
+	text->setText("Select a secret to recover");
+
+	QVBoxLayout *layout = new QVBoxLayout();
+	layout->addWidget(text);
+	layout->addWidget(secretview);
+	this->setLayout(layout);
+	
+  connect(secretview, SIGNAL(itemClicked(QListWidgetItem*)), 
+		this, SLOT(closeDialog()));
+}
+
+void RecoverSecretDialog::closeDialog()
+{
+	this->close();
 }
 
 /*****************************/
