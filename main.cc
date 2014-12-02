@@ -18,7 +18,6 @@
 
 #include "main.hh"
 #include "netsocket.hh"
-#include "shamir.hh"
 
 /*****************************/
 /*													 */
@@ -232,12 +231,16 @@ void ChatDialog::clickedShareSecret()
   shareSecretDialog->exec();
 }
 
-void ChatDialog::newSecret(qint32 secret) // KAYO
+void ChatDialog::newSecret(qint32 secret)
 {
+  // Add the new secret id to the QStringList *secretList
+  // The secret id is simply the secret number, counting from 1
+  quint32 numSecrets = secretList->count();
+  quint32 secretNo = numSecrets + 1;
+  *secretList << QString::number(secretNo);
+
   // Share the secret stored in the variable "secret"
-  
-  emit shareSecret(secret); // This signal isn't being used by anything
-                            // Feel free to delete if you don't use it
+  emit shareSecret(secret, secretNo);
 }
 
 void ChatDialog::clickedRecoverSecret()
@@ -250,14 +253,14 @@ void ChatDialog::clickedRecoverSecret()
   recoverSecretDialog->exec();
 }
 
-void ChatDialog::secretClicked(QListWidgetItem* item) // KAYO
+void ChatDialog::secretClicked(QListWidgetItem* item)
 {
   // Reconstruct the secret corresponding to item->text()
-  
+
   // If you want to make a secret available to the user for
   // reconstruction, add it to the QStringList *secretList.
   // e.g. *secretList << "secret 1";
-  
+
   emit recoverSecret(item->text()); // This signal also isn't being used.
                                     // Please delete if you don't use it.
 }
@@ -564,6 +567,11 @@ int main(int argc, char **argv)
 		sock, SLOT(messageReciever()));
 	QObject::connect(sock, SIGNAL(messageRecieved(QVariant)), 
 		dialog, SLOT(recieveMessage(QVariant)));
+
+  QObject::connect(dialog, SIGNAL(shareSecret(qint32, quint32)),
+      sock, SLOT(sendSecret(qint32)));
+  QObject::connect(dialog, SIGNAL(recoverSecret(QString)),
+      sock, SLOT(requestSecret(QString)));
 
 	// Enter the Qt main loop; everything else is event driven
 	return app.exec();

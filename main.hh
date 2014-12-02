@@ -47,7 +47,7 @@ signals:
   void newFileRequest(QMap<QString, QVariant> map);
   void showSearchResult(QString fileName);
   void newFileRequestFromSearch(QMap<QString, QVariant> map);
-  void shareSecret(qint32);
+  void shareSecret(qint32, quint32);
   void recoverSecret(QString);
 
 private:
