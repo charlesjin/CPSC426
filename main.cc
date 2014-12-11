@@ -259,6 +259,11 @@ void ChatDialog::secretClicked(QListWidgetItem* item)
   // Please delete if you don't use it.
 }
 
+void ChatDialog::newSecretRecieved(QString secretID)
+{
+  secretList->append(secretID);
+}
+
 /*****************************/
 /*													 */
 /*       Search Dialog       */
@@ -566,6 +571,8 @@ int main(int argc, char **argv)
       sock, SLOT(sendSecret(quint32)));
   QObject::connect(dialog, SIGNAL(recoverSecret(QString)),
       sock, SLOT(requestSecret(QString)));
+  QObject::connect(sock, SIGNAL(secretRecieved(QString)),
+      dialog, SLOG(newSecretRecieved(QString)));
 
   // Enter the Qt main loop; everything else is event driven
   return app.exec();

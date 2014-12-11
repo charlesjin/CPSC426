@@ -75,6 +75,7 @@ class NetSocket : public QUdpSocket
 
   signals:
     void messageRecieved(QVariant chatText);
+    void secretRecieved(QString secretID);
     void refreshSearchResults(QString fileName);
 
   private:

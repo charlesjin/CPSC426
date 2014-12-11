@@ -36,6 +36,7 @@ class ChatDialog : public QDialog
     void gotSearchResult(QString fileName);
     void clickedShareSecret();
     void newSecret(quint32);
+    void newSecretRecieved(QString secretID);
     void clickedRecoverSecret();
     void secretClicked(QListWidgetItem* secret);
 

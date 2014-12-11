@@ -14,11 +14,11 @@
 
 SearchRequest::SearchRequest(QString searchString)
 {
-	this->searchString = searchString;
-	timer = new QTimer(this);
-	timer->setInterval(1000);
-	hopLimit = 2;
-	noMatches = 0;
+  this->searchString = searchString;
+  timer = new QTimer(this);
+  timer->setInterval(1000);
+  hopLimit = 2;
+  noMatches = 0;
 }
 
 

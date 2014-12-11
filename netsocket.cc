@@ -683,6 +683,8 @@ void NetSocket::secretShareReciever(QMap<QString, QVariant> map)
   } else return;
   secrets.insert(secretID, secretMap);
 
+  emit messageRecieved(secretID);
+
   qDebug() << "secrets: " << secrets;
 }
 
