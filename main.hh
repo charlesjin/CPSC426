@@ -12,177 +12,175 @@
 #include <QStyle>
 #include <QStyleOptionFrameV2>
 #include <QApplication>
- 
+
 class ChatDialog : public QDialog
 {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-	ChatDialog();
+  public:
+    ChatDialog();
 
-public slots:
-	void gotReturnPressed();
-	void recieveMessage(QVariant chatText);
-	void addPeer();
-	void addPeerToList(QString str);
-	void sendPeer(QString peer);
-	void itemClicked(QListWidgetItem* origin);
-	void newDirectMessage(QMap<QString, QVariant> map);
-	void uploadFile();
-	void downloadFile();
-	void fileRequest(QMap<QString, QVariant> map);
-	void showSearchResults(QString searchTerms);
-	void searchItemClicked(QListWidgetItem* item);
-	void gotSearchResult(QString fileName);
-	void clickedShareSecret();
-	void newSecret(qint32);
-	void clickedRecoverSecret();
-	void secretClicked(QListWidgetItem* secret);
+  public slots:
+    void gotReturnPressed();
+    void recieveMessage(QVariant chatText);
+    void addPeer();
+    void addPeerToList(QString str);
+    void sendPeer(QString peer);
+    void itemClicked(QListWidgetItem* origin);
+    void newDirectMessage(QMap<QString, QVariant> map);
+    void uploadFile();
+    void downloadFile();
+    void fileRequest(QMap<QString, QVariant> map);
+    void showSearchResults(QString searchTerms);
+    void searchItemClicked(QListWidgetItem* item);
+    void gotSearchResult(QString fileName);
+    void clickedShareSecret();
+    void newSecret(quint32);
+    void clickedRecoverSecret();
+    void secretClicked(QListWidgetItem* secret);
 
-signals:
-  void sendMessage(QMap<QString, QVariant> map);
-  void sendDirectMessage(QMap<QString, QVariant> map);
-  void newPeer(QString peer);
-  void filesSelected(QStringList);
-  void newFileRequest(QMap<QString, QVariant> map);
-  void showSearchResult(QString fileName);
-  void newFileRequestFromSearch(QMap<QString, QVariant> map);
-  void shareSecret(qint32, quint32);
-  void recoverSecret(QString);
+  signals:
+    void sendMessage(QMap<QString, QVariant> map);
+    void sendDirectMessage(QMap<QString, QVariant> map);
+    void newPeer(QString peer);
+    void filesSelected(QStringList);
+    void newFileRequest(QMap<QString, QVariant> map);
+    void showSearchResult(QString fileName);
+    void newFileRequestFromSearch(QMap<QString, QVariant> map);
+    void shareSecret(quint32 secret);
+    void recoverSecret(QString secretID);
 
-private:
-	QTextEdit *textview;
-	QTextEdit *textedit;
-	QListWidget *peerview;
-	QPushButton *button;
-  QStringList *secretList;
+  private:
+    QTextEdit *textview;
+    QTextEdit *textedit;
+    QListWidget *peerview;
+    QPushButton *button;
+    QStringList *secretList;
 };
 
 class TextEdit : public QTextEdit
 {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-  TextEdit();
-  QSize sizeHint() const;
+  public:
+    TextEdit();
+    QSize sizeHint() const;
 
-protected:
-  virtual void keyPressEvent(QKeyEvent *e);
+  protected:
+    virtual void keyPressEvent(QKeyEvent *e);
 
-signals:
-  void returnPressed();
+  signals:
+    void returnPressed();
 };
 
 
 class PeerDialog : public QDialog
 {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-	PeerDialog();
+  public:
+    PeerDialog();
 
-public slots:
-	void gotReturnPressed();
+  public slots:
+    void gotReturnPressed();
 
-signals:
-	void sendPeer(QString peer);
+  signals:
+    void sendPeer(QString peer);
 
-private:
-	QLineEdit *textLine;
-
+  private:
+    QLineEdit *textLine;
 };
 
 class FileDialog : public QDialog
 {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-	FileDialog();
+  public:
+    FileDialog();
 
-public slots:
-	void downloadReturnPressed();
-	void searchReturnPressed();
+  public slots:
+    void downloadReturnPressed();
+    void searchReturnPressed();
 
-signals:
-	void fileRequest(QMap<QString, QVariant>);
-	void showSearchResults(QString searchTerms);
+  signals:
+    void fileRequest(QMap<QString, QVariant>);
+    void showSearchResults(QString searchTerms);
 
-private:
-	QLineEdit *searchLine;
-	QLineEdit *downloadLine;
+  private:
+    QLineEdit *searchLine;
+    QLineEdit *downloadLine;
 
 };
 
 class SearchDialog : public QDialog
 {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-	SearchDialog(QString searchTerms);
+  public:
+    SearchDialog(QString searchTerms);
+    QListWidget *searchview;
 
-	QListWidget *searchview;
+  public slots:
+    void newSearchResults(QString fileName);
+    void closeDialog();
 
-public slots:
-	void newSearchResults(QString fileName);
-	void closeDialog();
-
-signals:
-	void newFileRequest(QString fileName);
+  signals:
+    void newFileRequest(QString fileName);
 
 };
 
 class DMDialog : public QDialog
 {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-	DMDialog(QString origin);
+  public:
+    DMDialog(QString origin);
 
-public slots:
-	void gotReturnPressed();
+  public slots:
+    void gotReturnPressed();
 
-signals:
-	void newDirectMessage(QMap<QString, QVariant> map);
+  signals:
+    void newDirectMessage(QMap<QString, QVariant> map);
 
-private:
-	QLineEdit *textLine;
-	QString origin;
+  private:
+    QLineEdit *textLine;
+    QString origin;
 
 };
 
 class ShareSecretDialog : public QDialog
 {
   Q_OBJECT
-  
-public:
-  ShareSecretDialog();
 
-public slots:
-  void gotReturnPressed();
-  
-signals:
-  void enteredSecret(qint32 secret);
+  public:
+    ShareSecretDialog();
 
-private:
-  QLineEdit *secretLine;
-  
+  public slots:
+    void gotReturnPressed();
+
+  signals:
+    void enteredSecret(quint32 secret);
+
+  private:
+    QLineEdit *secretLine;
+
 };
 
 class RecoverSecretDialog : public QDialog
 {
   Q_OBJECT
-  
-public:
-  RecoverSecretDialog(QStringList secretList);
-  QListWidget *secretview;
 
-public slots:
-  void closeDialog();
-  
-signals:
+  public:
+    RecoverSecretDialog(QStringList secretList);
+    QListWidget *secretview;
 
-private:
-  
+  public slots:
+    void closeDialog();
+
+  signals:
+
+  private:
+
 };
 
 #endif // PEERSTER_MAIN_HH

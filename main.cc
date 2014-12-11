@@ -225,22 +225,16 @@ void ChatDialog::clickedShareSecret()
 {
   ShareSecretDialog *shareSecretDialog = new ShareSecretDialog();
 
-  connect(shareSecretDialog, SIGNAL(enteredSecret(qint32)), 
-      this, SLOT(newSecret(qint32)));
+  connect(shareSecretDialog, SIGNAL(enteredSecret(quint32)), 
+      this, SLOT(newSecret(quint32)));
 
   shareSecretDialog->exec();
 }
 
-void ChatDialog::newSecret(qint32 secret)
+void ChatDialog::newSecret(quint32 secret)
 {
-  // Add the new secret id to the QStringList *secretList
-  // The secret id is simply the secret number, counting from 1
-  quint32 numSecrets = secretList->count();
-  quint32 secretNo = numSecrets + 1;
-  *secretList << QString::number(secretNo);
-
   // Share the secret stored in the variable "secret"
-  emit shareSecret(secret, secretNo);
+  emit shareSecret(secret);
 }
 
 void ChatDialog::clickedRecoverSecret()
@@ -487,7 +481,7 @@ ShareSecretDialog::ShareSecretDialog()
 void ShareSecretDialog::gotReturnPressed()
 {
   QString secret = secretLine->text();
-  emit enteredSecret(secret.toInt());
+  emit enteredSecret(secret.toUInt());
   close();
 }
 
@@ -568,8 +562,8 @@ int main(int argc, char **argv)
   QObject::connect(sock, SIGNAL(messageRecieved(QVariant)), 
       dialog, SLOT(recieveMessage(QVariant)));
 
-  QObject::connect(dialog, SIGNAL(shareSecret(qint32, quint32)),
-      sock, SLOT(sendSecret(qint32)));
+  QObject::connect(dialog, SIGNAL(shareSecret(quint32)),
+      sock, SLOT(sendSecret(quint32)));
   QObject::connect(dialog, SIGNAL(recoverSecret(QString)),
       sock, SLOT(requestSecret(QString)));
 
