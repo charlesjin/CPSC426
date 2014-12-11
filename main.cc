@@ -28,197 +28,197 @@
 // initializes the chat dialog, which is the main IO
 ChatDialog::ChatDialog()
 {
-	setWindowTitle("Peerster");
+  setWindowTitle("Peerster");
 
-	// side window to view peers/initiate DM
-	peerview = new QListWidget(this);
-	peerview->setMaximumWidth(200);
-	peerview->setMinimumWidth(150);
-	connect(peerview, SIGNAL(itemClicked(QListWidgetItem*)), 
-		this, SLOT(itemClicked(QListWidgetItem*)));
+  // side window to view peers/initiate DM
+  peerview = new QListWidget(this);
+  peerview->setMaximumWidth(200);
+  peerview->setMinimumWidth(150);
+  connect(peerview, SIGNAL(itemClicked(QListWidgetItem*)), 
+      this, SLOT(itemClicked(QListWidgetItem*)));
 
-	// button to add peers
-	QPushButton *button = new QPushButton("Add Peer", this);
-	button->setAutoDefault(false);
-	button->setDefault(false);
+  // button to add peers
+  QPushButton *button = new QPushButton("Add Peer", this);
+  button->setAutoDefault(false);
+  button->setDefault(false);
   connect(button, SIGNAL(clicked()), 
-  	this, SLOT(addPeer()));
+      this, SLOT(addPeer()));
 
-	QVBoxLayout *peerLayout = new QVBoxLayout();
-	peerLayout->addWidget(button);
-	peerLayout->addWidget(peerview);
+  QVBoxLayout *peerLayout = new QVBoxLayout();
+  peerLayout->addWidget(button);
+  peerLayout->addWidget(peerview);
 
-	// main chat window
-	// displays chats
-	textview = new QTextEdit(this);
-	textview->setReadOnly(true);
-	textview->setMinimumWidth(250);
+  // main chat window
+  // displays chats
+  textview = new QTextEdit(this);
+  textview->setReadOnly(true);
+  textview->setMinimumWidth(250);
 
-	// gets input for new messages
-	textedit = new TextEdit();
+  // gets input for new messages
+  textedit = new TextEdit();
 
-	// upload file
-	QPushButton *uploadFileButton = new QPushButton("Upload File", this);
-	uploadFileButton->setAutoDefault(false);
-	uploadFileButton->setDefault(false);
-	connect(uploadFileButton, SIGNAL(clicked()), 
-  	this, SLOT(uploadFile()));
+  // upload file
+  QPushButton *uploadFileButton = new QPushButton("Upload File", this);
+  uploadFileButton->setAutoDefault(false);
+  uploadFileButton->setDefault(false);
+  connect(uploadFileButton, SIGNAL(clicked()), 
+      this, SLOT(uploadFile()));
 
-	QPushButton *downloadFileButton = new QPushButton("Request File", this);
-	downloadFileButton->setAutoDefault(false);
-	downloadFileButton->setDefault(false);
-	connect(downloadFileButton, SIGNAL(clicked()), 
-  	this, SLOT(downloadFile()));
+  QPushButton *downloadFileButton = new QPushButton("Request File", this);
+  downloadFileButton->setAutoDefault(false);
+  downloadFileButton->setDefault(false);
+  connect(downloadFileButton, SIGNAL(clicked()), 
+      this, SLOT(downloadFile()));
 
-	QHBoxLayout *fileLayout = new QHBoxLayout();
-	fileLayout->addWidget(uploadFileButton);
-	fileLayout->addWidget(downloadFileButton);
-	
-	// secret share
+  QHBoxLayout *fileLayout = new QHBoxLayout();
+  fileLayout->addWidget(uploadFileButton);
+  fileLayout->addWidget(downloadFileButton);
+
+  // secret share
   QPushButton *shareSecretButton = new QPushButton("Share Secret", this);
   shareSecretButton->setAutoDefault(false);
   shareSecretButton->setDefault(false);
   connect(shareSecretButton, SIGNAL(clicked()),
-    this, SLOT(clickedShareSecret()));
+      this, SLOT(clickedShareSecret()));
 
   QPushButton *recoverSecretButton = new QPushButton("Reconstruct Secret", this);
   recoverSecretButton->setAutoDefault(false);
   recoverSecretButton->setDefault(false);
   connect(recoverSecretButton, SIGNAL(clicked()),
-    this, SLOT(clickedRecoverSecret()));  
+      this, SLOT(clickedRecoverSecret()));  
   secretList = new QStringList();
-    
-	QHBoxLayout *secretLayout = new QHBoxLayout();
-	secretLayout->addWidget(shareSecretButton);
-	secretLayout->addWidget(recoverSecretButton);
 
-	QVBoxLayout *chatLayout = new QVBoxLayout();
-	chatLayout->addWidget(textview);
-	chatLayout->addWidget(textedit);
-	chatLayout->addLayout(fileLayout);
-	chatLayout->addLayout(secretLayout);
+  QHBoxLayout *secretLayout = new QHBoxLayout();
+  secretLayout->addWidget(shareSecretButton);
+  secretLayout->addWidget(recoverSecretButton);
 
-	QHBoxLayout *layout = new QHBoxLayout();
-	layout->addLayout(peerLayout, 1);
-	layout->addLayout(chatLayout, 0);
-	this->setLayout(layout);
-	textedit->setFocus();
+  QVBoxLayout *chatLayout = new QVBoxLayout();
+  chatLayout->addWidget(textview);
+  chatLayout->addWidget(textedit);
+  chatLayout->addLayout(fileLayout);
+  chatLayout->addLayout(secretLayout);
 
-	connect(textedit, SIGNAL(returnPressed()),
-		this, SLOT(gotReturnPressed()));
+  QHBoxLayout *layout = new QHBoxLayout();
+  layout->addLayout(peerLayout, 1);
+  layout->addLayout(chatLayout, 0);
+  this->setLayout(layout);
+  textedit->setFocus();
+
+  connect(textedit, SIGNAL(returnPressed()),
+      this, SLOT(gotReturnPressed()));
 }
 
 // slot called from the textedit, which intercepts all returns
 void ChatDialog::gotReturnPressed()
 {
-	QVariant str = textedit->toPlainText();
+  QVariant str = textedit->toPlainText();
 
-	// Don't send message if empty
-	if (str.toString().size() > 0){
-		QMap<QString, QVariant> map;
-		map["ChatText"] = str;
+  // Don't send message if empty
+  if (str.toString().size() > 0){
+    QMap<QString, QVariant> map;
+    map["ChatText"] = str;
 
-		emit sendMessage(map);
-		textview->setTextColor( QColor( "red" ) );
-		textview->append("me: " + str.toString());
-		textview->setTextColor( QColor( "black" ) );
-	}
+    emit sendMessage(map);
+    textview->setTextColor( QColor( "red" ) );
+    textview->append("me: " + str.toString());
+    textview->setTextColor( QColor( "black" ) );
+  }
 
-	// Clear the textedit to get ready for the next input message.
-	textedit->clear();
+  // Clear the textedit to get ready for the next input message.
+  textedit->clear();
 }
 
 // output a message when recieved from netsocket
 void ChatDialog::recieveMessage(QVariant message)
 {
-	textview->append(message.toString());
+  textview->append(message.toString());
 }
 
 // user clicks add peer button
 void ChatDialog::addPeer()
 {
-	PeerDialog *addPeer = new PeerDialog();
-	connect(addPeer, SIGNAL(sendPeer(QString)), 
-		this, SLOT(sendPeer(QString)));
-	addPeer->exec();
+  PeerDialog *addPeer = new PeerDialog();
+  connect(addPeer, SIGNAL(sendPeer(QString)), 
+      this, SLOT(sendPeer(QString)));
+  addPeer->exec();
 }
 
 // relays user input of new peer from peerdialog to netsocket
 void ChatDialog::sendPeer(QString str)
 {
-	emit newPeer(str);
+  emit newPeer(str);
 }
 
 void ChatDialog::addPeerToList(QString str)
 {
-	QListWidgetItem *newItem = new QListWidgetItem;
+  QListWidgetItem *newItem = new QListWidgetItem;
   newItem->setText(str);
   peerview->insertItem(1, newItem);
 }
 
 void ChatDialog::itemClicked(QListWidgetItem* origin)
 {
-	DMDialog *directMessageDialog = new DMDialog(origin->text());
-	connect(directMessageDialog, SIGNAL(newDirectMessage(QMap<QString, QVariant>)), 
-		this, SLOT(newDirectMessage(QMap<QString, QVariant>)));
-	directMessageDialog->exec();
+  DMDialog *directMessageDialog = new DMDialog(origin->text());
+  connect(directMessageDialog, SIGNAL(newDirectMessage(QMap<QString, QVariant>)), 
+      this, SLOT(newDirectMessage(QMap<QString, QVariant>)));
+  directMessageDialog->exec();
 }
 
 void ChatDialog::newDirectMessage(QMap<QString, QVariant> map)
 {
-	textview->setTextColor( QColor( "blue" ) );
-	textview->append("me (to " + map["Dest"].toString() + "): " + map["ChatText"].toString());
-	textview->setTextColor( QColor( "black" ) );
-	emit sendDirectMessage(map);
+  textview->setTextColor( QColor( "blue" ) );
+  textview->append("me (to " + map["Dest"].toString() + "): " + map["ChatText"].toString());
+  textview->setTextColor( QColor( "black" ) );
+  emit sendDirectMessage(map);
 }
 
 void ChatDialog::uploadFile()
 {
-	QFileDialog *fileDialog = new QFileDialog();
-	QStringList files = fileDialog->getOpenFileNames(
-    this,
-    "Select one or more files to send"
-  );
+  QFileDialog *fileDialog = new QFileDialog();
+  QStringList files = fileDialog->getOpenFileNames(
+      this,
+      "Select one or more files to send"
+      );
   emit filesSelected(files);
 }
 
 void ChatDialog::downloadFile()
 {
-	FileDialog *fileDialog = new FileDialog();
-	connect(fileDialog, SIGNAL(fileRequest(QMap<QString, QVariant>)), 
-		this, SLOT(fileRequest(QMap<QString, QVariant>)));
-	connect(fileDialog, SIGNAL(showSearchResults(QString)), 
-		this, SLOT(showSearchResults(QString)));
-	fileDialog->exec();
+  FileDialog *fileDialog = new FileDialog();
+  connect(fileDialog, SIGNAL(fileRequest(QMap<QString, QVariant>)), 
+      this, SLOT(fileRequest(QMap<QString, QVariant>)));
+  connect(fileDialog, SIGNAL(showSearchResults(QString)), 
+      this, SLOT(showSearchResults(QString)));
+  fileDialog->exec();
 }
 
 void ChatDialog::fileRequest(QMap<QString, QVariant> map)
 {
-	emit newFileRequest(map);
+  emit newFileRequest(map);
 }
 
 void ChatDialog::showSearchResults(QString searchTerms)
 {
-	SearchDialog *searchDialog = new SearchDialog(searchTerms);
+  SearchDialog *searchDialog = new SearchDialog(searchTerms);
 
-	connect(searchDialog->searchview, SIGNAL(itemClicked(QListWidgetItem*)), 
-		this, SLOT(searchItemClicked(QListWidgetItem*)));
-	connect(this, SIGNAL(showSearchResult(QString)), 
-		searchDialog, SLOT(newSearchResults(QString)));
+  connect(searchDialog->searchview, SIGNAL(itemClicked(QListWidgetItem*)), 
+      this, SLOT(searchItemClicked(QListWidgetItem*)));
+  connect(this, SIGNAL(showSearchResult(QString)), 
+      searchDialog, SLOT(newSearchResults(QString)));
 
-	searchDialog->exec();
+  searchDialog->exec();
 }
 
 void ChatDialog::gotSearchResult(QString fileName)
 {
-	emit showSearchResult(fileName);
+  emit showSearchResult(fileName);
 }
 
 void ChatDialog::searchItemClicked(QListWidgetItem* item)
 {
-	QMap<QString, QVariant> map;
-	map.insert("fileName", item->text());
-	emit newFileRequestFromSearch(map);
+  QMap<QString, QVariant> map;
+  map.insert("fileName", item->text());
+  emit newFileRequestFromSearch(map);
 }
 
 void ChatDialog::clickedShareSecret()
@@ -226,7 +226,7 @@ void ChatDialog::clickedShareSecret()
   ShareSecretDialog *shareSecretDialog = new ShareSecretDialog();
 
   connect(shareSecretDialog, SIGNAL(enteredSecret(qint32)), 
-    this, SLOT(newSecret(qint32)));
+      this, SLOT(newSecret(qint32)));
 
   shareSecretDialog->exec();
 }
@@ -246,10 +246,10 @@ void ChatDialog::newSecret(qint32 secret)
 void ChatDialog::clickedRecoverSecret()
 {
   RecoverSecretDialog *recoverSecretDialog = new RecoverSecretDialog(*secretList);
-  
+
   connect(recoverSecretDialog->secretview, SIGNAL(itemClicked(QListWidgetItem*)),
-    this, SLOT(secretClicked(QListWidgetItem*)));
-  
+      this, SLOT(secretClicked(QListWidgetItem*)));
+
   recoverSecretDialog->exec();
 }
 
@@ -262,7 +262,7 @@ void ChatDialog::secretClicked(QListWidgetItem* item)
   // e.g. *secretList << "secret 1";
 
   emit recoverSecret(item->text()); // This signal also isn't being used.
-                                    // Please delete if you don't use it.
+  // Please delete if you don't use it.
 }
 
 /*****************************/
@@ -273,32 +273,32 @@ void ChatDialog::secretClicked(QListWidgetItem* item)
 
 SearchDialog::SearchDialog(QString searchTerms)
 {
-	searchview = new QListWidget(this);
-	searchview->setMinimumWidth(300);
-	searchview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  searchview = new QListWidget(this);
+  searchview->setMinimumWidth(300);
+  searchview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-	QLabel *text = new QLabel(this);
-	text->setText("Search Terms: " + searchTerms);
+  QLabel *text = new QLabel(this);
+  text->setText("Search Terms: " + searchTerms);
 
-	QVBoxLayout *layout = new QVBoxLayout();
-	layout->addWidget(text);
-	layout->addWidget(searchview);
-	this->setLayout(layout);
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(text);
+  layout->addWidget(searchview);
+  this->setLayout(layout);
 
-	connect(searchview, SIGNAL(itemClicked(QListWidgetItem*)), 
-		this, SLOT(closeDialog()));
+  connect(searchview, SIGNAL(itemClicked(QListWidgetItem*)), 
+      this, SLOT(closeDialog()));
 }
 
 void SearchDialog::newSearchResults(QString fileName)
 {
-	QListWidgetItem *newItem = new QListWidgetItem;
+  QListWidgetItem *newItem = new QListWidgetItem;
   newItem->setText(fileName);
   searchview->insertItem(searchview->count(), newItem);
 }
 
 void SearchDialog::closeDialog()
 {
-	this->close();
+  this->close();
 }
 
 /*****************************/
@@ -325,14 +325,14 @@ QSize TextEdit::sizeHint() const
   QStyleOptionFrameV2 opt;
   opt.initFrom(this);
   return (style()->sizeFromContents(QStyle::CT_LineEdit, &opt,
-  	QSize(w, h).expandedTo(QApplication::globalStrut()), this));
+        QSize(w, h).expandedTo(QApplication::globalStrut()), this));
 }
 
 void TextEdit::keyPressEvent(QKeyEvent *event)
 {
   if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter){
     event->ignore();
-  	emit returnPressed();
+    emit returnPressed();
   } else
     QTextEdit::keyPressEvent(event);
 }
@@ -346,30 +346,30 @@ void TextEdit::keyPressEvent(QKeyEvent *event)
 // IO element for user adding peer
 PeerDialog::PeerDialog()
 {
-	setWindowTitle("Add Peer!");
-	QLabel *text = new QLabel(this);
-	textLine = new QLineEdit(this);
-	text->setText("Enter hostname:port OR ipaddr:port");
+  setWindowTitle("Add Peer!");
+  QLabel *text = new QLabel(this);
+  textLine = new QLineEdit(this);
+  text->setText("Enter hostname:port OR ipaddr:port");
 
-	QVBoxLayout *layout = new QVBoxLayout();
-	layout->addWidget(text);
-	layout->addWidget(textLine);
-	setLayout(layout);
-	
-	connect(textLine, SIGNAL(returnPressed()),
-		this, SLOT(gotReturnPressed()));
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(text);
+  layout->addWidget(textLine);
+  setLayout(layout);
+
+  connect(textLine, SIGNAL(returnPressed()),
+      this, SLOT(gotReturnPressed()));
 }
 
 // sends peer string to chatdialog
 void PeerDialog::gotReturnPressed()
 {
-	QString str = textLine->text();
+  QString str = textLine->text();
 
-	// Don't send message if empty
-	if (str.size() > 0){
-		emit sendPeer(str);
-		this->close();
-	}
+  // Don't send message if empty
+  if (str.size() > 0){
+    emit sendPeer(str);
+    this->close();
+  }
 }
 
 /*****************************/
@@ -380,50 +380,50 @@ void PeerDialog::gotReturnPressed()
 
 FileDialog::FileDialog()
 {
-	setWindowTitle("File Download");
+  setWindowTitle("File Download");
 
-	QLabel *downloadText = new QLabel(this);
-	downloadLine = new QLineEdit(this);
-	downloadText->setText("Direct download using nodeID:filehash");
+  QLabel *downloadText = new QLabel(this);
+  downloadLine = new QLineEdit(this);
+  downloadText->setText("Direct download using nodeID:filehash");
 
-	QLabel *searchText = new QLabel(this);
-	searchLine = new QLineEdit(this);
-	searchText->setText("Search for downloads by keyword");
+  QLabel *searchText = new QLabel(this);
+  searchLine = new QLineEdit(this);
+  searchText->setText("Search for downloads by keyword");
 
-	QVBoxLayout *layout = new QVBoxLayout();
-	layout->addWidget(downloadText);
-	layout->addWidget(downloadLine);
-	layout->addWidget(searchText);
-	layout->addWidget(searchLine);
-	this->setLayout(layout);
-	
-	connect(downloadLine, SIGNAL(returnPressed()),
-		this, SLOT(downloadReturnPressed()));
-	connect(searchLine, SIGNAL(returnPressed()),
-		this, SLOT(searchReturnPressed()));
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(downloadText);
+  layout->addWidget(downloadLine);
+  layout->addWidget(searchText);
+  layout->addWidget(searchLine);
+  this->setLayout(layout);
+
+  connect(downloadLine, SIGNAL(returnPressed()),
+      this, SLOT(downloadReturnPressed()));
+  connect(searchLine, SIGNAL(returnPressed()),
+      this, SLOT(searchReturnPressed()));
 }
 
 void FileDialog::downloadReturnPressed()
 {
-	QString str = downloadLine->text();
-	if (str.size() > 0){
-		QMap<QString, QVariant> map;
-		map["blockRequest"] = str;
-		emit fileRequest(map);
-		this->close();
-	}
+  QString str = downloadLine->text();
+  if (str.size() > 0){
+    QMap<QString, QVariant> map;
+    map["blockRequest"] = str;
+    emit fileRequest(map);
+    this->close();
+  }
 }
 
 void FileDialog::searchReturnPressed()
 {
-	QString str = searchLine->text();
-	if (str.size() > 0){
-		QMap<QString, QVariant> map;
-		map["searchRequest"] = str;
-		emit fileRequest(map);
-		emit showSearchResults(str);
-		this->close();
-	}
+  QString str = searchLine->text();
+  if (str.size() > 0){
+    QMap<QString, QVariant> map;
+    map["searchRequest"] = str;
+    emit fileRequest(map);
+    emit showSearchResults(str);
+    this->close();
+  }
 }
 
 /*****************************/
@@ -434,34 +434,34 @@ void FileDialog::searchReturnPressed()
 
 DMDialog::DMDialog(QString str)
 {
-	origin = str;
-	setWindowTitle("Direct Message!");
-	QLabel *text = new QLabel(this);
-	textLine = new QLineEdit(this);
-	text->setText("Send a direct message to " + origin);
+  origin = str;
+  setWindowTitle("Direct Message!");
+  QLabel *text = new QLabel(this);
+  textLine = new QLineEdit(this);
+  text->setText("Send a direct message to " + origin);
 
-	QVBoxLayout *layout = new QVBoxLayout();
-	layout->addWidget(text);
-	layout->addWidget(textLine);
-	setLayout(layout);
-	
-	connect(textLine, SIGNAL(returnPressed()),
-		this, SLOT(gotReturnPressed()));
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(text);
+  layout->addWidget(textLine);
+  setLayout(layout);
+
+  connect(textLine, SIGNAL(returnPressed()),
+      this, SLOT(gotReturnPressed()));
 }
 
 // sends DM to chatdialog
 void DMDialog::gotReturnPressed()
 {
-	QString message = textLine->text();
-	QMap<QString, QVariant> map;
-	map.insert("ChatText", message);
-	map.insert("Dest", origin);
+  QString message = textLine->text();
+  QMap<QString, QVariant> map;
+  map.insert("ChatText", message);
+  map.insert("Dest", origin);
 
-	// Don't send message if empty
-	if (message.size() > 0){
-		emit newDirectMessage(map);
-		this->close();
-	}
+  // Don't send message if empty
+  if (message.size() > 0){
+    emit newDirectMessage(map);
+    this->close();
+  }
 }
 
 /*****************************/
@@ -475,13 +475,13 @@ ShareSecretDialog::ShareSecretDialog()
   setWindowTitle("Share Secret");
   secretLine = new QLineEdit();
   secretLine->setPlaceholderText("Enter secret");
-  
+
   QVBoxLayout *shareSecretLayout = new QVBoxLayout();
   shareSecretLayout->addWidget(secretLine);
   setLayout(shareSecretLayout);
-  
+
   connect(secretLine, SIGNAL(returnPressed()),
-    this, SLOT(gotReturnPressed()));
+      this, SLOT(gotReturnPressed()));
 }
 
 void ShareSecretDialog::gotReturnPressed()
@@ -500,26 +500,26 @@ void ShareSecretDialog::gotReturnPressed()
 RecoverSecretDialog::RecoverSecretDialog(QStringList secretList)
 {
   setWindowTitle("Reconstruct Secret");
-	secretview = new QListWidget(this);
-	secretview->setMinimumWidth(300);
-	secretview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	secretview->addItems(secretList);
+  secretview = new QListWidget(this);
+  secretview->setMinimumWidth(300);
+  secretview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  secretview->addItems(secretList);
 
-	QLabel *text = new QLabel(this);
-	text->setText("Select a secret to recover");
+  QLabel *text = new QLabel(this);
+  text->setText("Select a secret to recover");
 
-	QVBoxLayout *layout = new QVBoxLayout();
-	layout->addWidget(text);
-	layout->addWidget(secretview);
-	this->setLayout(layout);
-	
+  QVBoxLayout *layout = new QVBoxLayout();
+  layout->addWidget(text);
+  layout->addWidget(secretview);
+  this->setLayout(layout);
+
   connect(secretview, SIGNAL(itemClicked(QListWidgetItem*)), 
-		this, SLOT(closeDialog()));
+      this, SLOT(closeDialog()));
 }
 
 void RecoverSecretDialog::closeDialog()
 {
-	this->close();
+  this->close();
 }
 
 /*****************************/
@@ -530,50 +530,50 @@ void RecoverSecretDialog::closeDialog()
 
 int main(int argc, char **argv)
 {
-	// Initialize Qt toolkit
-	QApplication app(argc,argv);
+  // Initialize Qt toolkit
+  QApplication app(argc,argv);
 
-	// initialize crypto
-	QCA::Initializer qcainit;
+  // initialize crypto
+  QCA::Initializer qcainit;
 
-	// Create an initial chat dialog window
-	ChatDialog *dialog = new ChatDialog();
-	dialog->show();
+  // Create an initial chat dialog window
+  ChatDialog *dialog = new ChatDialog();
+  dialog->show();
 
-	// Create a UDP network socket
-	NetSocket *sock = new NetSocket();
-	if (!sock->initialize())
-		exit(1);
+  // Create a UDP network socket
+  NetSocket *sock = new NetSocket();
+  if (!sock->initialize())
+    exit(1);
 
-	QObject::connect(dialog, SIGNAL(filesSelected(QStringList)),
-		sock->fileManager, SLOT(addFiles(QStringList)));
-	QObject::connect(dialog, SIGNAL(newFileRequest(QMap<QString, QVariant>)),
-		sock, SLOT(fileRequestSender(QMap<QString, QVariant>)));
-	QObject::connect(sock, SIGNAL(refreshSearchResults(QString)), 
-		dialog, SLOT(gotSearchResult(QString)));
-	QObject::connect(dialog, SIGNAL(newFileRequestFromSearch(QMap<QString, QVariant>)),
-		sock, SLOT(fileRequestSender(QMap<QString, QVariant>)));
+  QObject::connect(dialog, SIGNAL(filesSelected(QStringList)),
+      sock->fileManager, SLOT(addFiles(QStringList)));
+  QObject::connect(dialog, SIGNAL(newFileRequest(QMap<QString, QVariant>)),
+      sock, SLOT(fileRequestSender(QMap<QString, QVariant>)));
+  QObject::connect(sock, SIGNAL(refreshSearchResults(QString)), 
+      dialog, SLOT(gotSearchResult(QString)));
+  QObject::connect(dialog, SIGNAL(newFileRequestFromSearch(QMap<QString, QVariant>)),
+      sock, SLOT(fileRequestSender(QMap<QString, QVariant>)));
 
-	QObject::connect(dialog, SIGNAL(newPeer(QString)), 
-		sock->peerManager, SLOT(newPeer(QString)));
-	QObject::connect(sock->peerManager, SIGNAL(addPeerToList(QString)), 
-		dialog, SLOT(addPeerToList(QString)));
-	QObject::connect(dialog, SIGNAL(sendDirectMessage(QMap<QString, QVariant>)),
-		sock, SLOT(sendDirectMessage(QMap<QString, QVariant>)));
+  QObject::connect(dialog, SIGNAL(newPeer(QString)), 
+      sock->peerManager, SLOT(newPeer(QString)));
+  QObject::connect(sock->peerManager, SIGNAL(addPeerToList(QString)), 
+      dialog, SLOT(addPeerToList(QString)));
+  QObject::connect(dialog, SIGNAL(sendDirectMessage(QMap<QString, QVariant>)),
+      sock, SLOT(sendDirectMessage(QMap<QString, QVariant>)));
 
-	QObject::connect(dialog, SIGNAL(sendMessage(QMap<QString, QVariant>)), 
-		sock, SLOT(messageSender(QMap<QString, QVariant>)));
-	QObject::connect(sock, SIGNAL(readyRead()), 
-		sock, SLOT(messageReciever()));
-	QObject::connect(sock, SIGNAL(messageRecieved(QVariant)), 
-		dialog, SLOT(recieveMessage(QVariant)));
+  QObject::connect(dialog, SIGNAL(sendMessage(QMap<QString, QVariant>)), 
+      sock, SLOT(messageSender(QMap<QString, QVariant>)));
+  QObject::connect(sock, SIGNAL(readyRead()), 
+      sock, SLOT(messageReciever()));
+  QObject::connect(sock, SIGNAL(messageRecieved(QVariant)), 
+      dialog, SLOT(recieveMessage(QVariant)));
 
   QObject::connect(dialog, SIGNAL(shareSecret(qint32, quint32)),
       sock, SLOT(sendSecret(qint32)));
   QObject::connect(dialog, SIGNAL(recoverSecret(QString)),
       sock, SLOT(requestSecret(QString)));
 
-	// Enter the Qt main loop; everything else is event driven
-	return app.exec();
+  // Enter the Qt main loop; everything else is event driven
+  return app.exec();
 }
 
