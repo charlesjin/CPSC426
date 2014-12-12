@@ -34,3 +34,6 @@ SOURCES += shamir.cc
 
 HEADERS += secretmanager.hh
 SOURCES += secretmanager.cc
+
+HEADERS += dht.hh
+SOURCES += dht.cc

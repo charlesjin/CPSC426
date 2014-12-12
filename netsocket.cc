@@ -18,6 +18,7 @@
 
 #include "netsocket.hh"
 #include "shamir.hh"
+#include "dht.hh"
 
 /*****************************/
 /*                           */
@@ -69,7 +70,7 @@ bool NetSocket::initialize()
       connect(fileManager, SIGNAL(sendSearchRefreshRequest(QMap<QString, QVariant>)),
           this, SLOT(searchRequestSender(QMap<QString, QVariant>)));
 
-      dHTManager = new DHTManager();
+      dHTManager = new DHTManager(p, QHostAddress::LocalHost);
       connect(peerManager, SIGNAL(joinDHT(Peer *)),
           this, SLOT(joinDHT(Peer *)));
 
@@ -832,6 +833,7 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
   QString peerOriginID = map["JoinDHTRequest"].toString();
   if (originID > peerOriginID) {
     // Initialize the DHT
+    dHTManager->join(NULL, peer);
 
     // Send back finger[1].start
   } else {
