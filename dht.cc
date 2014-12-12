@@ -10,15 +10,15 @@
 
 DHTManager::DHTManager(quint16 port, QHostAddress hostAddress)
 {
-  self = new Node(-1, port, hostAddress);
+  self = new Node((int) (qrand() % 128), port, hostAddress);
   self->successor = self;
   self->predecessor = self;
   sizeDHT = 128;
 }
 
-int DHTManager::getIndex(Node *nn)
+int DHTManager::getIndex()
 {
-  return nn->index;
+  return self->index;
 }
 
 Node *DHTManager::findSuccessor(int id)
@@ -57,7 +57,7 @@ void DHTManager::join(Node *nn, Peer *peer)
     // Initialize the DHT
     for (int i = 0; i < (int) ceil(log2(this->sizeDHT)); i++) {
       FingerEntry entry;
-      entry.start = index + pow(2, i);
+      entry.start = self->index + pow(2, i);
       entry.node = this->self;
       finger << entry;
     }
@@ -79,7 +79,8 @@ void DHTManager::join(Peer *peer)
 void DHTManager::initFingerTable(QMap<QString, QVariant> map, Peer *peer)
 {
   Node *predecessor = new Node(map["PredIndex"].toInt(), 0, QHostAddress());
-  Node *node = new Node(map["Index"].toInt(), peer->port, peer->hostAddress);
+  Node *node = new Node(map["SuccIndex"].toInt(), map["SuccPort"].toUInt(),
+      map["SuccHostAddress"].toStringi());
   node->predecessor = predecessor;
   node->successor = NULL;
   this->initFingerTable(node, peer);
@@ -93,7 +94,7 @@ void DHTManager::initFingerTable(Node *nn, Peer *peer)
   entry.start = 0;
 
   for (i = 0; i < (int) ceil(log2(this->sizeDHT)); i++){
-    entry.start = index + pow(2, i);
+    entry.start = self->index + pow(2, i);
     finger << entry;
   }
 

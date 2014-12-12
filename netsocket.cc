@@ -813,6 +813,7 @@ void NetSocket::joinDHT(Peer *peer)
   // Send direct message to peer asking if it has DHT
   QVariantMap map;
   map.insert("JoinDHTRequest", originID);
+  map.insert("Index", dHTManager->getIndex());
 
   QByteArray message;
   QDataStream * stream = new QDataStream(&message, QIODevice::WriteOnly);
@@ -826,11 +827,11 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
 {
   // Base case: you are in the DHT
   // Send back finger[1].start
-  
 
   // Other case: you are not in the DHT.
   // Compare your originID with the originID of the peer
   QString peerOriginID = map["JoinDHTRequest"].toString();
+  int peerIndex = map["Index"].toInt();
   if (originID > peerOriginID) {
     // Initialize the DHT
     dHTManager->join(NULL, peer);
