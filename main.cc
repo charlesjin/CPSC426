@@ -1,7 +1,7 @@
 /*****************************/
-/*													 */
+/*                           */
 /*           Main            */
-/*													 */
+/*                           */
 /*****************************/
 
 // put main UI-related classes here
@@ -20,9 +20,9 @@
 #include "netsocket.hh"
 
 /*****************************/
-/*													 */
+/*                           */
 /*        Chat Dialog        */
-/*													 */
+/*                           */
 /*****************************/
 
 // initializes the chat dialog, which is the main IO
@@ -273,9 +273,9 @@ void ChatDialog::secretReconstructed(qint32 reconstructedSecret)
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*       Search Dialog       */
-/*													 */
+/*                           */
 /*****************************/
 
 SearchDialog::SearchDialog(QString searchTerms)
@@ -309,9 +309,9 @@ void SearchDialog::closeDialog()
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*         Text Edit         */
-/*													 */
+/*                           */
 /*****************************/
 
 TextEdit::TextEdit()
@@ -345,9 +345,9 @@ void TextEdit::keyPressEvent(QKeyEvent *event)
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*         Add Peer          */
-/*													 */
+/*                           */
 /*****************************/
 
 // IO element for user adding peer
@@ -380,9 +380,9 @@ void PeerDialog::gotReturnPressed()
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*      Search for File      */
-/*													 */
+/*                           */
 /*****************************/
 
 FileDialog::FileDialog()
@@ -434,9 +434,9 @@ void FileDialog::searchReturnPressed()
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*      Direct Message       */
-/*													 */
+/*                           */
 /*****************************/
 
 DMDialog::DMDialog(QString str)
@@ -472,9 +472,9 @@ void DMDialog::gotReturnPressed()
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*    Share Secret Dialog    */
-/*													 */
+/*                           */
 /*****************************/
 
 ShareSecretDialog::ShareSecretDialog()
@@ -502,9 +502,9 @@ void ShareSecretDialog::gotReturnPressed()
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*   Recover Secret Dialog   */
-/*													 */
+/*                           */
 /*****************************/
 
 RecoverSecretDialog::RecoverSecretDialog(QStringList secretList)
@@ -546,9 +546,9 @@ void RecoverSecretDialog::closeDialog()
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*           MAIN            */
-/*													 */
+/*                           */
 /*****************************/
 
 int main(int argc, char **argv)

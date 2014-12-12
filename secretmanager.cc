@@ -1,8 +1,12 @@
+/*****************************/
+/*                           */
+/*      Secret Manager       */
+/*                           */
+/*****************************/
+
 #include "secretmanager.hh"
 #include "shamir.hh"
 #include <QDebug>
-
-/* Secret Manager */
 
 SecretManager::SecretManager()
 {

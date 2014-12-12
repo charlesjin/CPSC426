@@ -1,7 +1,7 @@
 /*****************************/
-/*													 */
+/*                           */
 /*          Server           */
-/*													 */
+/*                           */
 /*****************************/
 
 #include <unistd.h>
@@ -20,9 +20,9 @@
 #include "shamir.hh"
 
 /*****************************/
-/*													 */
+/*                           */
 /* Netsocket Initializations */
-/*													 */
+/*                           */
 /*****************************/
 
 NetSocket::NetSocket()
@@ -107,9 +107,9 @@ bool NetSocket::initialize()
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*      Message Senders      */
-/*													 */
+/*                           */
 /*****************************/
 
 // sends a chat message that you created
@@ -306,9 +306,9 @@ void NetSocket::searchRequestSender(QMap<QString, QVariant> map, Peer *sender)
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*     Message Recievers     */
-/*													 */
+/*                           */
 /*****************************/
 
 void NetSocket::messageReciever()
@@ -491,9 +491,9 @@ void NetSocket::statusReciever(QMap<QString, QVariant> map, Peer *peer)
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*     Database Interface    */
-/*													 */
+/*                           */
 /*****************************/
 
 void NetSocket::pushMessage(QMap<QString, QVariant> map)
@@ -603,9 +603,9 @@ QMap<QString, QVariant> NetSocket::getMessage(QMap<QString, QVariant> peerWant)
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*   Rumormongering Manager  */
-/*													 */
+/*                           */
 /*****************************/
 
 // called every x seconds by a timer initialized in NetSocker::initialize()
@@ -674,9 +674,9 @@ void NetSocket::resendRumor()
 }
 
 /*****************************/
-/*													 */
+/*                           */
 /*      Secret Sharing       */
-/*													 */
+/*                           */
 /*****************************/
 
 void NetSocket::secretShareReciever(QMap<QString, QVariant> map)

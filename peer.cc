@@ -1,7 +1,7 @@
 /*****************************/
-/*													 */
+/*                           */
 /*           Peer            */
-/*													 */
+/*                           */
 /*****************************/
 
 // peer class for maintaining a connection to a peer

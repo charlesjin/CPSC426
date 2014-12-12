@@ -1,15 +1,15 @@
 /*****************************/
-/*													 */
+/*                           */
 /*      File Connection      */
-/*													 */
+/*                           */
 /*****************************/
 
 #include "fileconnection.hh"
 
 /*****************************/
-/*													 */
+/*                           */
 /*      Search Requests      */
-/*													 */
+/*                           */
 /*****************************/
 
 SearchRequest::SearchRequest(QString searchString)
@@ -23,17 +23,17 @@ SearchRequest::SearchRequest(QString searchString)
 
 
 /*****************************/
-/*													 */
+/*                           */
 /*       Block Requests      */
-/*													 */
+/*                           */
 /*****************************/
 
 BlockRequest::BlockRequest(QString peerID, QByteArray headerHash, QString fileName)
 {
-	this->peerID = peerID;
-	this->headerHash = headerHash;
-	this->fileName = fileName;
-	noTries = 0;
-	timer = new QTimer(this);
-	timer->setInterval(10000);
+  this->peerID = peerID;
+  this->headerHash = headerHash;
+  this->fileName = fileName;
+  noTries = 0;
+  timer = new QTimer(this);
+  timer->setInterval(10000);
 }

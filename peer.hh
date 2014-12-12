@@ -9,26 +9,26 @@
 
 class Peer : public QObject
 {
-	Q_OBJECT
+  Q_OBJECT
 
 public:
-	Peer();
+  Peer();
 
-	quint16 port;
-	QString hostName;
-	QHostAddress hostAddress;
+  quint16 port;
+  QString hostName;
+  QHostAddress hostAddress;
 
-	QTimer *timer;
-	QByteArray data;
+  QTimer *timer;
+  QByteArray data;
 
-	public slots:
-		void initPeer(QString host);
-		void initPeer(QHostAddress address);
-		void hostLookupDone(const QHostInfo &host);
-		void reverseHostLookupDone(const QHostInfo &host);
+  public slots:
+    void initPeer(QString host);
+    void initPeer(QHostAddress address);
+    void hostLookupDone(const QHostInfo &host);
+    void reverseHostLookupDone(const QHostInfo &host);
 
-	signals:
-		void initPeerDone();
+  signals:
+    void initPeerDone();
 
 };
 
