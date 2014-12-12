@@ -292,8 +292,8 @@ SearchDialog::SearchDialog(QString searchTerms)
   layout->addWidget(searchview);
   this->setLayout(layout);
 
-  connect(searchview, SIGNAL(itemClicked(QListWidgetItem*)), 
-      this, SLOT(closeDialog()));
+  // connect(searchview, SIGNAL(itemClicked(QListWidgetItem*)), 
+  //     this, SLOT(closeDialog()));
 }
 
 void SearchDialog::newSearchResults(QString fileName)

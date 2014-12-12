@@ -14,9 +14,6 @@ void SecretManager::newSecretShare(QMap<QString, QVariant> map)
   qDebug() << "newSecretShare :" << map;
   QString secretID = map["SecretReply"].toString();
 
-  if (secrets[secretID].second.length() >= secrets[secretID].first)
-    this->reconstructSecret(secretID);
-
   if (!secrets.contains(secretID)){
     if (map.contains("Threshold")){
       QPair<quint16, QList<QPair<qint16, qint64> > > newSecretPair;
@@ -26,6 +23,12 @@ void SecretManager::newSecretShare(QMap<QString, QVariant> map)
       secrets.insert(secretID, newSecretPair);
     } else return;
   }
+
+  if (secrets[secretID].second.length() >= secrets[secretID].first){
+    this->reconstructSecret(secretID);
+    return;
+  }
+  
   QPair<qint16, qint64> point;
   point.first = (qint16) map["x"].toUInt();
   point.second = (qint64) map["fx"].toUInt();
