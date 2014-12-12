@@ -475,8 +475,11 @@ ShareSecretDialog::ShareSecretDialog()
   setWindowTitle("Share Secret");
   secretLine = new QLineEdit();
   secretLine->setPlaceholderText("Enter secret");
+  QLabel *label = new QLabel(this);
+  label->setText("Enter secret");
 
   QVBoxLayout *shareSecretLayout = new QVBoxLayout();
+  shareSecretLayout->addWidget(label);
   shareSecretLayout->addWidget(secretLine);
   setLayout(shareSecretLayout);
 
