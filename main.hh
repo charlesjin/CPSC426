@@ -173,7 +173,8 @@ class RecoverSecretDialog : public QDialog
 
   public:
     RecoverSecretDialog(QStringList secretList);
-    QListWidget *secretview;
+    QListWidget *secretlistview;
+    QTextEdit *recoveredsecretview;
 
   public slots:
     void closeDialog();

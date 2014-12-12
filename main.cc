@@ -241,7 +241,7 @@ void ChatDialog::clickedRecoverSecret()
 {
   RecoverSecretDialog *recoverSecretDialog = new RecoverSecretDialog(*secretList);
 
-  connect(recoverSecretDialog->secretview, SIGNAL(itemClicked(QListWidgetItem*)),
+  connect(recoverSecretDialog->secretlistview, SIGNAL(itemClicked(QListWidgetItem*)),
       this, SLOT(secretClicked(QListWidgetItem*)));
 
   recoverSecretDialog->exec();
@@ -500,20 +500,28 @@ void ShareSecretDialog::gotReturnPressed()
 RecoverSecretDialog::RecoverSecretDialog(QStringList secretList)
 {
   setWindowTitle("Reconstruct Secret");
-  secretview = new QListWidget(this);
-  secretview->setMinimumWidth(300);
-  secretview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  secretview->addItems(secretList);
+  secretlistview = new QListWidget(this);
+  secretlistview->setMinimumWidth(300);
+  secretlistview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  secretlistview->addItems(secretList);
 
-  QLabel *text = new QLabel(this);
-  text->setText("Select a secret to recover");
+  QLabel *listLabel = new QLabel(this);
+  listLabel->setText("Select a secret to recover");
+
+  recoveredsecretview = new QTextEdit(this);
+  recoveredsecretview->setMaximumHeight(30);
+  recoveredsecretview->setReadOnly(true);
+  QLabel *viewLabel = new QLabel(this);
+  viewLabel->setText("The recovered secret");
 
   QVBoxLayout *layout = new QVBoxLayout();
-  layout->addWidget(text);
-  layout->addWidget(secretview);
+  layout->addWidget(listLabel);
+  layout->addWidget(secretlistview);
+  layout->addWidget(viewLabel);
+  layout->addWidget(recoveredsecretview);
   this->setLayout(layout);
 
-  connect(secretview, SIGNAL(itemClicked(QListWidgetItem*)), 
+  connect(secretlistview, SIGNAL(itemClicked(QListWidgetItem*)), 
       this, SLOT(closeDialog()));
 }
 
