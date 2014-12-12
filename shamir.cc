@@ -33,7 +33,7 @@ QList<QPair<qint16, qint64> > ShamirSecret::generateSecrets(qint32 secret, qint1
 
 	qsrand(time(0));
 	for (int i = 1; i < threshold; i++)
-		polynomial << qrand();
+		polynomial << qrand() % 1000;
 
 	for (qint16 i = 1; i <= noPlayers; i++){
 		qint64 value = 0;

@@ -254,9 +254,9 @@ void ChatDialog::secretClicked(QListWidgetItem* item)
   // If you want to make a secret available to the user for
   // reconstruction, add it to the QStringList *secretList.
   // e.g. *secretList << "secret 1";
+  qDebug() << "emit: " << item->text();
 
-  emit recoverSecret(item->text()); // This signal also isn't being used.
-  // Please delete if you don't use it.
+  emit recoverSecret(item->text());
 }
 
 void ChatDialog::newSecretRecieved(QString secretID)
