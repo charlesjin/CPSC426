@@ -19,7 +19,7 @@ void SecretManager::newSecretShare(QMap<QString, QVariant> map)
     if (map.contains("Threshold")){
       QPair<quint16, QList<QPair<qint16, qint64> > > newSecretPair;
       QList<QPair<qint16, qint64> > newSecretList;
-      newSecretPair.first = map("Threshold").toUInt();
+      newSecretPair.first = map["Threshold"].toUInt();
       newSecretPair.second = newSecretList;
     } else return;
   }
