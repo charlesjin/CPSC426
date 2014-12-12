@@ -59,6 +59,8 @@ bool NetSocket::initialize()
       secretManager->setParent(this);
       connect(this, SIGNAL(newSecretShare(QMap<QString, QVariant>)),
           secretManager, SLOT(newSecretShare(QMap<QString, QVariant>)));
+      connect(secretManager, SIGNAL(secretRecovered(qint32)),
+          this, SLOT(secretRecovered(qint32)));
 
       fileManager = new FileManager();
       fileManager->setParent(this);
@@ -791,3 +793,7 @@ void NetSocket::recoverSecret(QString secretID)
   }
 }
 
+void NetSocket::secretRecovered(qint32 recoveredSecret)
+{
+  emit secretReconstructed(recoveredSecret);
+}

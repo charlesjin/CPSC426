@@ -39,6 +39,7 @@ class ChatDialog : public QDialog
     void newSecretRecieved(QString secretID);
     void clickedRecoverSecret();
     void secretClicked(QListWidgetItem* secret);
+    void secretReconstructed(qint32 reconstructedSecret);
 
   signals:
     void sendMessage(QMap<QString, QVariant> map);
@@ -50,6 +51,7 @@ class ChatDialog : public QDialog
     void newFileRequestFromSearch(QMap<QString, QVariant> map);
     void shareSecret(quint32 secret);
     void recoverSecret(QString secretID);
+    void showReconstructedSecret(qint32 reconstructedSecret);
 
   private:
     QTextEdit *textview;
@@ -178,6 +180,7 @@ class RecoverSecretDialog : public QDialog
 
   public slots:
     void closeDialog();
+    void showReconstructedSecret(qint32 reconstructedSecret);
 
   signals:
 

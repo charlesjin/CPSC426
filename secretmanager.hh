@@ -16,6 +16,9 @@ class SecretManager : public QObject
   public slots:
     void newSecretShare(QMap<QString, QVariant> map);
 
+  signals:
+    void secretRecovered(qint32 recoveredSecret);
+
   private:
     void reconstructSecret(QString secretID);
     QMap<QString, QPair<quint16, QList<QPair<qint16, qint64> > > > secrets; /* secretID, <threshold, <x, fx> > */
