@@ -12,6 +12,7 @@ class PeerManager : public QObject
 public:
 	PeerManager(QString originID, quint16 port);
 	QList<Peer*> peerPorts; /* list of pointers to peers */
+	QHash<QString, QPair<QHostAddress,quint16> > routingTable; /* <originID, <IP, port> > */ 
 
 	/* returns a random peer for rumormongering */
 	Peer* randomPeer();
@@ -37,7 +38,6 @@ signals:
 	void newPeerReady(Peer *newPeer);
 
 private:
-	QHash<QString, QPair<QHostAddress,quint16> > routingTable; /* <originID, <IP, port> > */ 
 	QString originID;
 	quint16 myPort;
 	QString myHostName;

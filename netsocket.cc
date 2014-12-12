@@ -55,6 +55,11 @@ bool NetSocket::initialize()
       connect(peerManager, SIGNAL(newPeerReady(Peer *)),
           this, SLOT(sendRouteRumorToPeer(Peer *)));
 
+      secretManager = new SecretManager();
+      secretManager->setParent(this);
+      connect(this, SIGNAL(newSecretShare(QMap<QString, QVariant>)),
+          secretManager, SLOT(newSecretShare(QMap<QString, QVariant>)));
+
       fileManager = new FileManager();
       fileManager->setParent(this);
       connect(fileManager, SIGNAL(sendBlockRefreshRequest(QMap<QString, QVariant>)),
@@ -153,11 +158,16 @@ void NetSocket::sendDirectMessage(QMap<QString, QVariant> map)
   if (noForward)
     return;
 
+  qDebug() << "161" << map;
+
   if (!map.contains("Origin")){
     quint32 hopLimit = 10;
     map["HopLimit"] = hopLimit;
     map["Origin"] = originID;
   } else {
+
+    qDebug() << "169";
+
     if (map["HopLimit"].toInt() <= 0){
       return;
     }
@@ -166,6 +176,8 @@ void NetSocket::sendDirectMessage(QMap<QString, QVariant> map)
 
   QPair<QHostAddress,quint16> routes = peerManager->getRoutes(map["Dest"].toString());
   if (!routes.first.isNull()){
+
+    qDebug() << "180";
 
     QByteArray message;
     QDataStream * stream = new QDataStream(&message, QIODevice::WriteOnly);
@@ -346,6 +358,8 @@ void NetSocket::directMessageReciever(QMap<QString, QVariant> map, Peer *peer)
   QString dest = map["Dest"].toString();
   QString origin = map["Origin"].toString();
 
+  qDebug() << "354 directMessageReciever";
+
   // this is for me
   if (dest == originID){
     if (map.contains("BlockRequest"))
@@ -356,6 +370,10 @@ void NetSocket::directMessageReciever(QMap<QString, QVariant> map, Peer *peer)
       this->searchReplyReciever(map);
     else if (map.contains("SecretShare"))
       this->secretShareReciever(map);
+    else if (map.contains("SecretRequest"))
+      this->secretRequestReciever(map);
+    else if (map.contains("SecretReply"))
+      this->secretReplyReciever(map);
     else {
       QVariant message = origin + " (via DM): " + map["ChatText"].toString();
       emit messageRecieved(message);
@@ -671,6 +689,8 @@ void NetSocket::resendRumor()
 
 void NetSocket::secretShareReciever(QMap<QString, QVariant> map)
 {
+  qDebug() << "685 secretShareReceiver " << map;
+
   QString secretID = map["Origin"].toString() + ":" +
       map["SecretNo"].toString();
   QMap <QString, QVariant> secretMap;
@@ -688,16 +708,35 @@ void NetSocket::secretShareReciever(QMap<QString, QVariant> map)
   qDebug() << "secrets: " << secrets;
 }
 
+void NetSocket::secretRequestReciever(QMap<QString, QVariant> map) 
+{
+  QMap<QString, QVariant> secretResponse;
+  
+  QString secretID = map["SecretRequest"].toString();
+  QMap<QString, QVariant>  secret = secrets[secretID];
+
+  secretResponse.insert("x", secret["x"]);
+  secretResponse.insert("fx", secret["fx"]);
+  secretResponse.insert("SecretReply", secretID);
+  secretResponse.insert("Dest", map["Origin"]);
+
+  sendDirectMessage(secretResponse);
+  
+}
+
+void NetSocket::secretReplyReciever(QMap<QString, QVariant> map)
+{
+  emit newSecretShare(map);
+}
+
 void NetSocket::sendSecret(quint32 secret)
 {
-  // Get the list of peers.
-  QList<Peer *> peerPorts = peerManager->peerPorts;
 
   // Get the number of nodes in the network to determine the threshold
   // (number of peers plus 1 to account for the node that generated
   // the secret).
   // Let the threshold k be 75% of the total number of nodes.
-  quint16 numNodes = peerPorts.count() + 1;
+  quint16 numNodes = peerManager->routingTable.size() + 1;
   quint16 threshold = (numNodes * 3) / 4;
 
   // Break up the secret into n shares, where n is the number of nodes.
@@ -705,40 +744,49 @@ void NetSocket::sendSecret(quint32 secret)
     ShamirSecret::generateSecrets(secret, numNodes, threshold);
 
   // Build the message skeleton.
-  QVariantMap secretMsg;
+  QMap<QString, QVariant> secretMsg;
   secretMsg.insert("SecretNo", secretNo++);
   secretMsg.insert("Threshold", threshold);
 
-  // For each peer, send it its secret share.
-  for (int i = 0; i < numNodes; i++) {
-    QPair<qint16, qint64> sharePair = secretShares.at(i);
+  qDebug() << "742";
+  
+  QHash<QString, QPair<QHostAddress, quint16> >::iterator i;
+  QHash<QString, QPair<QHostAddress, quint16> >routingTable = peerManager->routingTable;
+  int j = 0;
+  for (i = routingTable.begin(); i != routingTable.end(); i++, j++){
+    secretMsg.insert("Dest", i.key());
+
+    QPair<qint16, qint64> sharePair = secretShares.at(j);
     QVariantList secretShare;
     secretShare.push_back((quint16) sharePair.first);
     secretShare.push_back((quint64) sharePair.second);
 
     secretMsg.insert("SecretShare", secretShare);
 
-    if (i == 0) {
-      // Send the first share to yourself.
-      secretMsg.insert("Dest", originID);
-      secretMsg.insert("Origin", originID);
-      secretMsg.insert("HopLimit", 1);
-      secretShareReciever(secretMsg);
-    } else {
-      // Send the secret share to the peer.
-      secretMsg.insert("Dest", peerPorts.at(i)->hostName);
-      sendDirectMessage(secretMsg);
-    }
+    sendDirectMessage(secretMsg);
   }
+  qDebug() << "753: " << j;
+
+  // Send the first share to yourself.
+  secretMsg.insert("Dest", originID);
+  secretMsg.insert("Origin", originID);
+  secretMsg.insert("HopLimit", 1);
+  secretShareReciever(secretMsg);
 
   qDebug() << "Sent all secret shares to peers.";
 }
 
-void NetSocket::requestSecret(QString secretID)
+void NetSocket::recoverSecret(QString secretID)
 {
-  quint32 secretNo = secretID.toUInt();
-  // Build the message.
-  QVariantMap secretRequestMsg;
-  secretRequestMsg.insert("SecretRequest", secretNo);
+  QVariantMap recoverMsg;
+  recoverMsg.insert("Origin", originID);
+  recoverMsg.insert("SecretRequest", secretID);
+
+  QList<Peer *> peerPorts = peerManager->peerPorts;
+
+  for (int i = 0; i < peerPorts.count(); i++) {
+    recoverMsg.insert("Dest", peerPorts.at(i)->hostName);
+    sendDirectMessage(recoverMsg);
+  }
 }
 

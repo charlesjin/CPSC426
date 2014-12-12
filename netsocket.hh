@@ -8,6 +8,7 @@
 #include "peer.hh"
 #include "peermanager.hh"
 #include "filemanager.hh"
+#include "secretmanager.hh"
 
 class NetSocket : public QUdpSocket
 {
@@ -19,6 +20,7 @@ class NetSocket : public QUdpSocket
     NetSocket();
     PeerManager *peerManager;
     FileManager *fileManager;
+    SecretManager *secretManager;
     bool noForward;
 
     /* Bind this socket to a Peerster-specific default port. */
@@ -35,6 +37,8 @@ class NetSocket : public QUdpSocket
     void blockReplyReciever(QMap<QString, QVariant> map);
     void searchReplyReciever(QMap<QString, QVariant> map);
     void secretShareReciever(QMap<QString, QVariant> map);
+    void secretRequestReciever(QMap<QString, QVariant> map);
+    void secretReplyReciever(QMap<QString, QVariant> map);
     void searchRequestReciever(QMap<QString, QVariant> map, Peer *peer);
     void chatReciever(QMap<QString, QVariant> map, Peer* peer);
     void statusReciever(QMap<QString, QVariant> map, Peer* peer);
@@ -47,9 +51,7 @@ class NetSocket : public QUdpSocket
     /* rumormongering */
     void beginRumor(QByteArray data);
     void allRumor(QByteArray data);
-  
-  
-  
+
   public slots:
     /* message senders */
     void messageSender(QMap<QString, QVariant> map);
@@ -71,12 +73,12 @@ class NetSocket : public QUdpSocket
 
     /* secret sharing */
     void sendSecret(quint32 secret);
-    void requestSecret(QString secretID);
-
+    void recoverSecret(QString secretID);
   signals:
     void messageRecieved(QVariant chatText);
     void secretRecieved(QString secretID);
     void refreshSearchResults(QString fileName);
+  void newSecretShare(QMap<QString, QVariant> map);
 
   private:
     int myPortMin, myPortMax, myPort;

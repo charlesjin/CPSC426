@@ -570,10 +570,10 @@ int main(int argc, char **argv)
 
   QObject::connect(dialog, SIGNAL(shareSecret(quint32)),
       sock, SLOT(sendSecret(quint32)));
-  QObject::connect(dialog, SIGNAL(recoverSecret(QString)),
-      sock, SLOT(requestSecret(QString)));
   QObject::connect(sock, SIGNAL(secretRecieved(QString)),
       dialog, SLOT(newSecretRecieved(QString)));
+  QObject::connect(dialog, SIGNAL(recoverSecret(QString)),
+      sock, SLOT(recoverSecret(QString)));
 
   // Enter the Qt main loop; everything else is event driven
   return app.exec();

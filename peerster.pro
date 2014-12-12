@@ -31,3 +31,6 @@ SOURCES += fileconnection.cc
 
 HEADERS += shamir.hh
 SOURCES += shamir.cc
+
+HEADERS += secretmanager.hh
+SOURCES += secretmanager.cc
