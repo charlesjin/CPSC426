@@ -36,6 +36,7 @@ signals:
   void initPeer(QString host);
   void addPeerToList(QString str);
   void newPeerReady(Peer *newPeer);
+  void joinDHT(Peer *peer);
 
 private:
   QString originID;

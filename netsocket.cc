@@ -42,7 +42,7 @@ bool NetSocket::initialize()
 
       // seed qrand, initialize members
       qsrand(time(0));
-      originID = "charles-" + QString::number((time(0) + qrand() + p) % 524288);
+      originID = "vanish-" + QString::number((time(0) + qrand() + p) % 524288);
       seqNo = 1;
       secretNo = 1;
 
@@ -68,6 +68,10 @@ bool NetSocket::initialize()
           this, SLOT(sendDirectMessage(QMap<QString, QVariant>)));
       connect(fileManager, SIGNAL(sendSearchRefreshRequest(QMap<QString, QVariant>)),
           this, SLOT(searchRequestSender(QMap<QString, QVariant>)));
+
+      dHTManager = new DHTManager();
+      connect(peerManager, SIGNAL(joinDHT(Peer *)),
+          this, SLOT(joinDHT(Peer *)));
 
       // start antientropy stuff
       QTimer *aeTimer = new QTimer(this);
@@ -337,7 +341,9 @@ void NetSocket::messageReciever()
     this->chatReciever(map, peer);
   else if (map.contains("Want"))
     this->statusReciever(map, peer);
-  else 
+  else if (map.contains("JoinDHTRequest"))
+    this->joinDHTReciever(map, peer);
+  else
     qDebug() << "--------Bad Message-------" << map << "-----------------";
 
 }
@@ -687,7 +693,6 @@ void NetSocket::secretShareReciever(QMap<QString, QVariant> map)
   QVariantList secretList = map["SecretShare"].toList();
 
   secretMap.insert("Threshold", map["Threshold"]);
-  qDebug () << "MEOW MEOW MOEWOEWOEWMOE " << map["Threshold"];
   if (!secretList.isEmpty()){
     secretMap.insert("x", secretList.first());
     secretMap.insert("fx", secretList.last());
@@ -698,7 +703,7 @@ void NetSocket::secretShareReciever(QMap<QString, QVariant> map)
 }
 
 void NetSocket::secretRequestReciever(QMap<QString, QVariant> map) 
-{ 
+{
   QString secretID = map["SecretRequest"].toString();
 
   if (secrets.contains(secretID)){
@@ -777,7 +782,6 @@ void NetSocket::recoverSecret(QString secretID)
     shareMap.insert("x", secret["x"]);
     shareMap.insert("fx", secret["fx"]);
     shareMap.insert("Threshold", secret["Threshold"]);
-    qDebug() << "778 " << secret;
     emit newSecretShare(shareMap);
 
     QMap<QString, QVariant> recoverMsg;
@@ -786,7 +790,6 @@ void NetSocket::recoverSecret(QString secretID)
     QHash<QString, QPair<QHostAddress, quint16> >::iterator i;
     QHash<QString, QPair<QHostAddress, quint16> >routingTable = peerManager->routingTable;
     for (i = routingTable.begin(); i != routingTable.end(); i++){
-      qDebug() << "recover secret sent";
       recoverMsg.insert("Dest", i.key());
       sendDirectMessage(recoverMsg);
     }
@@ -797,3 +800,43 @@ void NetSocket::secretRecovered(qint32 recoveredSecret)
 {
   emit secretReconstructed(recoveredSecret);
 }
+
+/*****************************/
+/*                           */
+/*           DHT             */
+/*                           */
+/*****************************/
+
+void NetSocket::joinDHT(Peer *peer)
+{
+  // Send direct message to peer asking if it has DHT
+  QVariantMap map;
+  map.insert("JoinDHTRequest", originID);
+
+  QByteArray message;
+  QDataStream * stream = new QDataStream(&message, QIODevice::WriteOnly);
+  (*stream) << map;
+  delete stream;
+
+  this->writeDatagram (message.data(), message.size(), peer->hostAddress, peer->port);
+}
+
+void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
+{
+  // Base case: you are in the DHT
+  // Send back finger[1].start
+  
+
+  // Other case: you are not in the DHT.
+  // Compare your originID with the originID of the peer
+  QString peerOriginID = map["JoinDHTRequest"].toString();
+  if (originID > peerOriginID) {
+    // Initialize the DHT
+
+    // Send back finger[1].start
+  } else {
+    // Ask the peer to initialize the DHT
+    joinDHT(peer);
+  }
+}
+

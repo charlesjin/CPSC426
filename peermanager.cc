@@ -19,7 +19,7 @@ PeerManager::PeerManager(QString origin, quint16 port)
 Peer* PeerManager::checkPeer(QHostAddress sender, quint16 senderPort)
 {
   // check if host is already saved
-   Peer *newPeer = new Peer();
+  Peer *newPeer = new Peer();
   newPeer->port = senderPort;
   newPeer->hostAddress = sender;
 
@@ -90,6 +90,9 @@ void PeerManager::addPeer()
   }
 
   peerPorts.append(newPeer);
+  if (peerPorts.size() == 1) {
+    emit joinDHT(newPeer);
+  }
   emit newPeerReady(newPeer);
   connect(newPeer->timer, SIGNAL(timeout()), this->parent(), SLOT(resendRumor()));
 }

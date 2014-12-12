@@ -3,16 +3,20 @@
 
 #include "dht.hh"
 
-int Node::getIndex(Node *nn) {
-  return nn->val;
+DHTManager::DHTManager() {
+  sizeDHT = 128;
 }
 
-Node *Node::findSuccessor(int id) {
+int DHTManager::getIndex(Node *nn) {
+  return nn->index;
+}
+
+Node *DHTManager::findSuccessor(int id) {
   Node *nn = findPredecessor(id);
   return nn->successor;
 }
 
-Node *Node::findPredecessor(int id) {
+Node *DHTManager::findPredecessor(int id) {
   Node *nn = this;
   while (id <= getIndex(nn) || id > getIndex(nn->successor)) {
     nn = nn->closestPrecedingFinger(id);
@@ -20,7 +24,7 @@ Node *Node::findPredecessor(int id) {
   return nn;
 }
 
-Node *Node::closestPrecedingFinger(int id) {
+Node *DHTManager::closestPrecedingFinger(int id) {
   for (int i = finger.size() - 1; i >= 0; i--) {
     if (getIndex(finger[i].node) > getIndex(this) && getIndex(finger[i].node) < id) {
       return finger[i].node;
@@ -29,12 +33,13 @@ Node *Node::closestPrecedingFinger(int id) {
   return this;
 }
 
-void Node::join(Node *nn) {
+void DHTManager::join(Node *nn) {
   if (nn != NULL) {
     initFingerTable(nn);
     updateOthers();
   } else {
     // This is the first node in the network
+    // Initialize the DHT
     for (int i = 0; i < finger.size(); i++) {
       finger[i].node = this;
     }
@@ -42,7 +47,7 @@ void Node::join(Node *nn) {
   }
 }
 
-void Node::initFingerTable(Node *nn) {
+void DHTManager::initFingerTable(Node *nn) {
   finger[1].node = nn->findSuccessor(getIndex(finger[1].start));
   predecessor = successor->predecessor;
   successor->predecessor = this;
@@ -57,14 +62,14 @@ void Node::initFingerTable(Node *nn) {
   }
 }
 
-void Node::updateOthers() {
+void DHTManager::updateOthers() {
   for (int i = 0; i < finger.size(); i ++) {
     Node *p = findPredecessor(getIndex(this) - pow(2, i - 1));
     p->updateFingerTable(this, i);
   }
 }
 
-void Node::updateFingerTable(Node *nn, int i) {
+void DHTManager::updateFingerTable(Node *nn, int i) {
   if (getIndex(nn) >= getIndex(this) &&
       getIndex(nn) < getIndex(finger[i].node)) {
     finger[i].node = nn;
