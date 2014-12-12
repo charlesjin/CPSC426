@@ -22,8 +22,15 @@ void SecretManager::newSecretShare(QMap<QString, QVariant> map)
     } else return;
   }
   QPair<qint16, qint64> point;
+  qDebug() << "=============================";
+  qDebug() << map["x"];
+  qDebug() << map["fx"];
   point.first = (qint16) map["x"].toUInt();
   point.second = (qint64) map["fx"].toUInt();
+  qDebug() << point.first;
+  qDebug() << point.second;
+  qDebug() << "------------------------------";
+
   secrets[secretID].second.push_back(point);
 
   qDebug() << "secrets after adding: " << secrets;

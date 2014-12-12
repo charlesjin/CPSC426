@@ -775,7 +775,7 @@ void NetSocket::recoverSecret(QString secretID)
     shareMap.insert("SecretReply", secretID);
     shareMap.insert("x", secret["x"]);
     shareMap.insert("fx", secret["fx"]);
-    shareMap.insert("Threshold", secret["threshold"]);
+    shareMap.insert("Threshold", secret["Threshold"]);
     emit newSecretShare(shareMap);
 
     QMap<QString, QVariant> recoverMsg;
