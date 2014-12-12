@@ -24,17 +24,18 @@ void SecretManager::newSecretShare(QMap<QString, QVariant> map)
     } else return;
   }
 
+  if (secrets[secretID].second.length() < secrets[secretID].first){
+    QPair<qint16, qint64> point;
+    point.first = (qint16) map["x"].toUInt();
+    point.second = (qint64) map["fx"].toUInt();
+    secrets[secretID].second.push_back(point);
+    qDebug() << "secrets after adding: " << secrets;
+  }
+
   if (secrets[secretID].second.length() >= secrets[secretID].first){
     this->reconstructSecret(secretID);
     return;
   }
-  
-  QPair<qint16, qint64> point;
-  point.first = (qint16) map["x"].toUInt();
-  point.second = (qint64) map["fx"].toUInt();
-  secrets[secretID].second.push_back(point);
-
-  qDebug() << "secrets after adding: " << secrets;
 }
 
 void SecretManager::reconstructSecret(QString secretID)
