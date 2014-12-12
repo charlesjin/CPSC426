@@ -16,10 +16,10 @@ void SecretManager::newSecretShare(QMap<QString, QVariant> map)
   qDebug() << "newSecretShare :" << map;
   QString secretID = map["SecretReply"].toString();
   if (!secrets.contains(secretID)){
-    if (map.contains("threshold")){
+    if (map.contains("Threshold")){
       QPair<quint16, QList<QPair<qint16, qint64> > > newSecretPair;
       QList<QPair<qint16, qint64> > newSecretList;
-      newSecretPair.first = map("threshold").toUInt();
+      newSecretPair.first = map("Threshold").toUInt();
       newSecretPair.second = newSecretList;
     } else return;
   }

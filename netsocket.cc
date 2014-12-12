@@ -684,7 +684,7 @@ void NetSocket::secretShareReciever(QMap<QString, QVariant> map)
   QMap <QString, QVariant> secretMap;
   QVariantList secretList = map["SecretShare"].toList();
 
-  secretMap.insert("threshold", map["Threshold"]);
+  secretMap.insert("Threshold", map["Threshold"]);
   if (!secretList.isEmpty()){
     secretMap.insert("x", secretList.first());
     secretMap.insert("fx", secretList.last());
@@ -773,7 +773,7 @@ void NetSocket::recoverSecret(QString secretID)
     shareMap.insert("SecretReply", secretID);
     shareMap.insert("x", secret["x"]);
     shareMap.insert("fx", secret["fx"]);
-    shareMap.insert("threshold", secret["threshold"]);
+    shareMap.insert("Threshold", secret["threshold"]);
     emit newSecretShare(shareMap);
 
     QMap<QString, QVariant> recoverMsg;
