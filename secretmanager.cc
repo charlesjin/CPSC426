@@ -4,8 +4,6 @@
 
 /* Secret Manager */
 
-
-
 SecretManager::SecretManager()
 {
   // do nothing
@@ -40,5 +38,7 @@ void SecretManager::reconstructSecret(QString secretID)
   qint32 answer;
   answer = ShamirSecret::solveSecret(secrets[secretID].second);
   qDebug() << answer;
+
+  emit secretRecovered(answer);
 }
 

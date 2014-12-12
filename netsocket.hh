@@ -74,11 +74,14 @@ class NetSocket : public QUdpSocket
     /* secret sharing */
     void sendSecret(quint32 secret);
     void recoverSecret(QString secretID);
+    void secretRecovered(qint32 recoveredSecret);
+
   signals:
     void messageRecieved(QVariant chatText);
     void secretRecieved(QString secretID);
     void refreshSearchResults(QString fileName);
-  void newSecretShare(QMap<QString, QVariant> map);
+    void newSecretShare(QMap<QString, QVariant> map);
+    void secretReconstructed(qint32 reconstructedSecret);
 
   private:
     int myPortMin, myPortMax, myPort;

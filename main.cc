@@ -243,6 +243,8 @@ void ChatDialog::clickedRecoverSecret()
 
   connect(recoverSecretDialog->secretlistview, SIGNAL(itemClicked(QListWidgetItem*)),
       this, SLOT(secretClicked(QListWidgetItem*)));
+  connect(this, SIGNAL(showReconstructedSecret(qint32)),
+      recoverSecretDialog, SLOT(showReconstructedSecret(qint32)));
 
   recoverSecretDialog->exec();
 }
@@ -263,6 +265,11 @@ void ChatDialog::newSecretRecieved(QString secretID)
 {
   secretList->append(secretID);
   qDebug() << secretList;
+}
+
+void ChatDialog::secretReconstructed(qint32 reconstructedSecret)
+{
+  emit showReconstructedSecret(reconstructedSecret);
 }
 
 /*****************************/
@@ -524,8 +531,13 @@ RecoverSecretDialog::RecoverSecretDialog(QStringList secretList)
   layout->addWidget(recoveredsecretview);
   this->setLayout(layout);
 
-  connect(secretlistview, SIGNAL(itemClicked(QListWidgetItem*)), 
-      this, SLOT(closeDialog()));
+//  connect(secretlistview, SIGNAL(itemClicked(QListWidgetItem*)), 
+//      this, SLOT(closeDialog()));
+}
+
+void RecoverSecretDialog::showReconstructedSecret(qint32 reconstructedSecret)
+{
+  recoveredsecretview->setText(QString::number(reconstructedSecret));
 }
 
 void RecoverSecretDialog::closeDialog()
@@ -585,6 +597,8 @@ int main(int argc, char **argv)
       dialog, SLOT(newSecretRecieved(QString)));
   QObject::connect(dialog, SIGNAL(recoverSecret(QString)),
       sock, SLOT(recoverSecret(QString)));
+  QObject::connect(sock, SIGNAL(secretReconstructed(qint32)),
+      dialog, SLOT(secretReconstructed(qint32)));
 
   // Enter the Qt main loop; everything else is event driven
   return app.exec();
