@@ -83,6 +83,17 @@ bool NetSocket::initialize()
           dHTManager, SLOT(updatePredecessor(QVariantMap)));
       connect(dHTManager, SIGNAL(fingerTableUpdatedSignal(QList<QPair<int, int> >)),
           this, SLOT(fingerTableUpdated(QList<QPair<int, int> >)));
+//=======
+//      connect(this, SIGNAL(newPredecessor(QVariantMap)),
+//          dHTManager, SLOT(newPredecessor(QVariantMap)));
+//      connect(this, SIGNAL(sendCurrentPredecessor(Peer*)),
+//          dHTManager, SLOT(sendCurrentPredecessor(Peer*)));
+//      connect(this, SIGNAL(stabilize(QMap<QString, QVariant>)),
+//          dHTManager, SLOT(stabilize(QMap<QString, QVariant>)));
+//      connect(this, SIGNAL(notify(QMap<QString, QVariant>)),
+//          dHTManage, SLOT(notify(QMap<QString, QVariant>)));
+//
+//>>>>>>> 01b5185c0ed74ed80c6db0950784229bd2de07c4
 
       // start antientropy stuff
       QTimer *aeTimer = new QTimer(this);
@@ -358,8 +369,20 @@ void NetSocket::messageReciever()
     this->chatReciever(map, peer);
   else if (map.contains("Want"))
     this->statusReciever(map, peer);
+//=======
+//  else if (map.contains("JoinDHTRequest"))
+//    this->joinDHTReciever(map, peer);
+//  else if (map.contains("newPredecessor"))
+//    this->newPredecessorReciever(map);
+//>>>>>>> 01b5185c0ed74ed80c6db0950784229bd2de07c4
   else if (map.contains("updateIndex"))
     this->updateIndexReciever(map);
+//  else if (map.contains("StoredPredecessorRequest"))
+//    this->storedPredecessorRequestReciever(map, peer);
+//  else if (map.contains("StoredPredecessorResponse"))
+//    this->storedPredecessorResponseReciever(map);
+//  else if (map.contains("Notify"))
+//    this->notifyReciever(map);
   else
     qDebug() << "--------Bad Message-------" << map << "-----------------";
 
@@ -909,6 +932,11 @@ void NetSocket::successorResponseReciever(QMap<QString, QVariant> map, Peer* pee
     qDebug() << "ya fucked up: " << map;
 }
 
+//void NetSocket::newPredecessorReciever(QMap<QString, QVariant> map)
+//{
+//  emit newPredecessor(map);
+//}
+
 void NetSocket::updateIndexReciever(QVariantMap map)
 {
   emit updateIndex(map);
@@ -918,3 +946,18 @@ void NetSocket::fingerTableUpdated(QList<QPair<int, int> > table) {
   emit fingerTableUpdatedSignal(table);
 }
 
+//=======
+//void NetSocket::storedPredecessorRequestReciever(Peer* peer) 
+//{
+//  emit sendCurrentPredecessor(peer);
+//}
+//
+//void NetSocket::storedPredecessorResponseReciever (QMap<QString, QVariant> map)
+//{
+//  emit stabilize(map);
+//}
+//
+//void NetSocket::notifyReciever(QMap<QString, QVariant> map) {
+//  emit notify(map);
+//}
+//>>>>>>> 01b5185c0ed74ed80c6db0950784229bd2de07c4
