@@ -58,9 +58,11 @@ class DHTManager : public QObject
     void receivedHeartbeat();
     void predecessorFailed();
     void fixFingers();
+    void updateFingerTableWithNewNode(int peerIndex, Peer *peer);
 
   signals:
     void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
+    void fingerTableUpdatedSignal(QList<QPair<int, int> >);
 
   private:
     int sizeDHT;
@@ -78,6 +80,8 @@ class DHTManager : public QObject
     void initFingerTable(QMap<QString, QVariant> map, Peer* peer);
     void updateOthers();
     bool betweenInterval(int begin, int end, int x);
+    void fingerTableUpdated();
+    bool inRange(int i, int start, int end);
 };
 
 #endif // PEERSTER_DHT_HH

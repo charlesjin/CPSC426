@@ -41,6 +41,13 @@ bool NetSocket::initialize()
     if (QUdpSocket::bind(p)) {
       myPort = p;
 
+      QHostInfo info = QHostInfo::fromName(QHostInfo::localHostName());
+      QList<QHostAddress> l = info.addresses();
+      if (l.size() > 0)
+        myHostAddress = l[0];
+      else
+        return false;
+
       // seed qrand, initialize members
       qsrand(time(0));
       originID = "vanish-" + QString::number((time(0) + qrand() + p) % 524288);
@@ -70,15 +77,13 @@ bool NetSocket::initialize()
       connect(fileManager, SIGNAL(sendSearchRefreshRequest(QMap<QString, QVariant>)),
           this, SLOT(searchRequestSender(QMap<QString, QVariant>)));
 
-      dHTManager = new DHTManager(originID, p, QHostAddress::LocalHost);
+      dHTManager = new DHTManager(originID, p, myHostAddress);
       connect(peerManager, SIGNAL(joinDHT(Peer *)),
           this, SLOT(joinDHT(Peer *)));
       connect(dHTManager, SIGNAL(sendDHTMessage(QVariantMap, quint16, QHostAddress)),
           this, SLOT(sendDHTMessage(QVariantMap, quint16, QHostAddress)));
       connect(this, SIGNAL(successorRequest(QVariantMap, Peer*)),
           dHTManager, SLOT(successorRequest(QVariantMap, Peer*)));
-      connect(this, SIGNAL(findSuccessor(int, Peer*, QString)),
-          dHTManager, SLOT(findSuccessor(int, Peer*, QString)));
       connect(this, SIGNAL(updateFingerTable(QMap<QString, QVariant>)),
           dHTManager, SLOT(updateFingerTable(QMap<QString, QVariant>)));
       connect(this, SIGNAL(updateIndex(QVariantMap)),
@@ -93,17 +98,31 @@ bool NetSocket::initialize()
           dHTManager, SLOT(notify(QMap<QString, QVariant>)));
       connect(this, SIGNAL(receivedHeartbeat()),
           dHTManager, SLOT(receivedHeartbeat()));
-
+      connect(dHTManager, SIGNAL(fingerTableUpdatedSignal(QList<QPair<int, int> >)),
+          this, SLOT(fingerTableUpdated(QList<QPair<int, int> >)));
+      connect(this, SIGNAL(updateFingerTableWithNewNode(int, Peer*)),
+          dHTManager, SLOT(updateFingerTableWithNewNode(int, Peer*)));
+//=======
+//      connect(this, SIGNAL(newPredecessor(QVariantMap)),
+//          dHTManager, SLOT(newPredecessor(QVariantMap)));
+//      connect(this, SIGNAL(sendCurrentPredecessor(Peer*)),
+//          dHTManager, SLOT(sendCurrentPredecessor(Peer*)));
+//      connect(this, SIGNAL(stabilize(QMap<QString, QVariant>)),
+//          dHTManager, SLOT(stabilize(QMap<QString, QVariant>)));
+//      connect(this, SIGNAL(notify(QMap<QString, QVariant>)),
+//          dHTManage, SLOT(notify(QMap<QString, QVariant>)));
+//
+//>>>>>>> 01b5185c0ed74ed80c6db0950784229bd2de07c4
 
       // start antientropy stuff
-      QTimer *aeTimer = new QTimer(this);
-      connect(aeTimer, SIGNAL(timeout()), this, SLOT(antiEntropy()));
-      aeTimer->start(1500);
+      // QTimer *aeTimer = new QTimer(this);
+      // connect(aeTimer, SIGNAL(timeout()), this, SLOT(antiEntropy()));
+      // aeTimer->start(1500);
 
-      // start route rumors
-      QTimer *rTimer = new QTimer(this);
-      connect(rTimer, SIGNAL(timeout()), this, SLOT(sendRouteRumor()));
-      rTimer->start(60000);
+      // // start route rumors
+      // QTimer *rTimer = new QTimer(this);
+      // connect(rTimer, SIGNAL(timeout()), this, SLOT(sendRouteRumor()));
+      // rTimer->start(60000);
 
       // parse the command-line args
       QStringList arguments = QCoreApplication::arguments();
@@ -161,7 +180,7 @@ void NetSocket::messageSender(QMap<QString, QVariant> map)
   if (seqNo == 2){
     for (int p = myPortMin; p <= myPortMax; p++){
       if (p != myPort){
-        this->writeDatagram (message.data(), message.size(), QHostAddress(QHostAddress::LocalHost), p);
+        this->writeDatagram (message.data(), message.size(), myHostAddress, p);
       }
     }
   }
@@ -203,6 +222,7 @@ void NetSocket::sendDirectMessage(QMap<QString, QVariant> map)
     (*stream) << map;
     delete stream;
 
+    qDebug() << "sending DM" << routes.first << routes.second;
     this->writeDatagram (message.data(), message.size(), 
         routes.first, routes.second);
   }
@@ -352,11 +372,19 @@ void NetSocket::messageReciever()
 
   Peer *peer = peerManager->checkPeer(sender, senderPort);
 
+  qDebug() << "GOT MESSAGE: " << map;
+
   if (map.contains("LastIP") && map.contains("LastPort"))
     peerManager->checkPeer(map["LastIP"].toUInt(), map["LastPort"].toUInt());
 
   if (map.contains("SuccessorRequest"))
     this->successorRequestReciever(map, peer);
+  else if (map.contains("JoinDHTRequest"))
+    this->joinDHTReciever(map, peer);
+  else if (map.contains("SuccessorResponse"))
+    this->successorResponseReciever(map, peer);
+  else if (map.contains("InitializeID"))
+    emit updateFingerTableWithNewNode(map["InitializeID"].toUInt(), peer);
   else if (map.contains("Dest"))
     this->directMessageReciever(map, peer);
   else if (map.contains("Search"))
@@ -365,10 +393,12 @@ void NetSocket::messageReciever()
     this->chatReciever(map, peer);
   else if (map.contains("Want"))
     this->statusReciever(map, peer);
-  else if (map.contains("JoinDHTRequest"))
-    this->joinDHTReciever(map, peer);
-  else if (map.contains("newPredecessor"))
-    this->newPredecessorReciever(map);
+//=======
+//  else if (map.contains("JoinDHTRequest"))
+//    this->joinDHTReciever(map, peer);
+//  else if (map.contains("newPredecessor"))
+//    this->newPredecessorReciever(map);
+//>>>>>>> 01b5185c0ed74ed80c6db0950784229bd2de07c4
   else if (map.contains("updateIndex"))
     this->updateIndexReciever(map);
   else if (map.contains("StoredPredecessorRequest"))
@@ -381,6 +411,12 @@ void NetSocket::messageReciever()
     this->heartbeatRequestReciever(peer);
   else if (map.contains("HeartbeatReply"))
     this->heartbeatReplyReciever();
+//  else if (map.contains("StoredPredecessorRequest"))
+//    this->storedPredecessorRequestReciever(map, peer);
+//  else if (map.contains("StoredPredecessorResponse"))
+//    this->storedPredecessorResponseReciever(map);
+//  else if (map.contains("Notify"))
+//    this->notifyReciever(map);
   else
     qDebug() << "--------Bad Message-------" << map << "-----------------";
 
@@ -392,7 +428,6 @@ void NetSocket::directMessageReciever(QMap<QString, QVariant> map, Peer *peer)
   if (noForward)
     return;
 
-  qDebug() << "DM recieved: " << map;
   QString dest = map["Dest"].toString();
   QString origin = map["Origin"].toString();
 
@@ -753,10 +788,8 @@ void NetSocket::secretRequestReciever(QMap<QString, QVariant> map)
     secretResponse.insert("SecretReply", secretID);
     secretResponse.insert("Dest", map["Origin"]);
 
-    qDebug() << "Sending secret response: " << secretResponse;
     sendDirectMessage(secretResponse);
-  } else
-    qDebug() << "Did not find secret";
+  }
 }
 
 void NetSocket::secretReplyReciever(QMap<QString, QVariant> map)
@@ -869,7 +902,13 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
   // Send back the successor of peerIndex + 1 and the predecessor of that
   // successor
   if (dHTManager->isInDHT()) {
-    emit findSuccessor(peerIndex + 1, peer, peerOriginID);
+    QVariantMap newMap;
+    newMap.insert("SuccessorRequest", peerIndex + 1);
+    newMap.insert("Origin", peerOriginID);
+    newMap.insert("RequestPort", peer->port);
+    newMap.insert("RequestHostAddress", peer->hostAddress.toString());
+    emit updateFingerTableWithNewNode(peerIndex, peer);
+    emit successorRequest(newMap, peer);
     return;
   }
 
@@ -878,10 +917,17 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
   if (originID > peerOriginID) {
     // Initialize the DHT
     dHTManager->initializeDHT();
+    emit updateFingerTableWithNewNode(peerIndex, peer);
 
     // Send back the successor of peerIndex + 1 and the predecessor of that
     // successor
-    emit findSuccessor(peerIndex + 1, peer, peerOriginID);
+    QVariantMap newMap;
+    newMap.insert("SuccessorRequest", peerIndex + 1);
+    newMap.insert("Origin", peerOriginID);
+    newMap.insert("RequestPort", peer->port);
+    newMap.insert("RequestHostAddress", peer->hostAddress.toString());
+    emit successorRequest(newMap, peer);
+
   } else {
     // Ask the peer to initialize the DHT
     joinDHT(peer);
@@ -890,37 +936,46 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
 
 void NetSocket::sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress)
 {
+  // qDebug() << "sendDHTMessage " << map;
+
+  // if (port == myPort && hostAddress == myHostAddress && !map.contains("SuccessorResponse"))
+  //   return;
+
   QByteArray message;
   QDataStream * stream = new QDataStream(&message, QIODevice::WriteOnly);
   (*stream) << map;
   delete stream;
 
+  qDebug() << port << hostAddress;
   this->writeDatagram (message.data(), message.size(), hostAddress, port);
 }
 
 void NetSocket::successorRequestReciever(QMap<QString, QVariant> map, Peer* peer)
 {
+  qDebug() << "successorRequestReciever " << map;
   emit successorRequest(map, peer);
 }
 
 void NetSocket::successorResponseReciever(QMap<QString, QVariant> map, Peer* peer)
 {
+  qDebug() << "successorResponseReciever " << map;
   if (map["Dest"].toString() == originID) {
     if (!dHTManager->isInDHT())
       dHTManager->join(peer, map);
     else
       emit updateFingerTable(map);
   } else
-    qDebug() << "ya fucked up: " << map;
+    qDebug() << "=====ya fucked up=======";
 }
 
-void NetSocket::newPredecessorReciever(QMap<QString, QVariant> map)
-{
-  emit newPredecessor(map);
-}
+//void NetSocket::newPredecessorReciever(QMap<QString, QVariant> map)
+//{
+//  emit newPredecessor(map);
+//}
 
 void NetSocket::updateIndexReciever(QVariantMap map)
 {
+  qDebug() << "updateIndexReciever " << map;
   emit updateIndex(map);
 }
 
@@ -950,3 +1005,23 @@ void NetSocket::heartbeatReplyReciever()
 {
   emit receivedHeartbeat();
 }
+
+void NetSocket::fingerTableUpdated(QList<QPair<int, int> > table) {
+  emit fingerTableUpdatedSignal(table);
+}
+
+//=======
+//void NetSocket::storedPredecessorRequestReciever(Peer* peer) 
+//{
+//  emit sendCurrentPredecessor(peer);
+//}
+//
+//void NetSocket::storedPredecessorResponseReciever (QMap<QString, QVariant> map)
+//{
+//  emit stabilize(map);
+//}
+//
+//void NetSocket::notifyReciever(QMap<QString, QVariant> map) {
+//  emit notify(map);
+//}
+//>>>>>>> 01b5185c0ed74ed80c6db0950784229bd2de07c4
