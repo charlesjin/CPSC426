@@ -292,7 +292,7 @@ void DHTManager::updateFingerTableWithNewNode(int peerIndex, Peer *peer)
       finger[i].node->port = peer->port;
     }
   }
-
+  updateOthers();
   fingerTableUpdated();
 }
 
