@@ -70,15 +70,19 @@ bool NetSocket::initialize()
       connect(fileManager, SIGNAL(sendSearchRefreshRequest(QMap<QString, QVariant>)),
           this, SLOT(searchRequestSender(QMap<QString, QVariant>)));
 
-      dHTManager = new DHTManager(p, QHostAddress::LocalHost);
+      dHTManager = new DHTManager(originID, p, QHostAddress::LocalHost);
       connect(peerManager, SIGNAL(joinDHT(Peer *)),
           this, SLOT(joinDHT(Peer *)));
       connect(dHTManager, SIGNAL(sendDHTMessage(QVariantMap, quint16, QHostAddress)),
           this, SLOT(sendDHTMessage(QVariantMap, quint16, QHostAddress)));
       connect(this, SIGNAL(successorRequest(QVariantMap, Peer*)),
-          dHTManager, SLOT(successorRequest(QVariantMap, Peer *)));
-      connect(this, SIGNAL(findSuccessor(int, Peer*)),
-          dHTManager, SLOT(findSuccessor(int, Peer*)));
+          dHTManager, SLOT(successorRequest(QVariantMap, Peer*)));
+      connect(this, SIGNAL(findSuccessor(int, Peer*, QString)),
+          dHTManager, SLOT(findSuccessor(int, Peer*, QString)));
+      connect(this, SIGNAL(updateFingerTable(QMap<QString, QVariant>)),
+          dHTManager, SLOT(updateFingerTable(QMap<QString, QVariant>)));
+      connect(this, SIGNAL(updateIndex(QVariantMap)),
+          dHTManager, SLOT(updatePredecessor(QVariantMap)));
 
       // start antientropy stuff
       QTimer *aeTimer = new QTimer(this);
@@ -352,6 +356,8 @@ void NetSocket::messageReciever()
     this->statusReciever(map, peer);
   else if (map.contains("JoinDHTRequest"))
     this->joinDHTReciever(map, peer);
+  else if (map.contains("updateIndex"))
+    this->updateIndexReciever(map);
   else
     qDebug() << "--------Bad Message-------" << map << "-----------------";
 
@@ -848,7 +854,7 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
   // Compare your originID with the originID of the peer
   if (originID > peerOriginID) {
     // Initialize the DHT
-    dHTManager->join(NULL, peer);
+    dHTManager->initializeDHT();
 
     // Send back the successor of peerIndex + 1 and the predecessor of that
     // successor
@@ -877,10 +883,15 @@ void NetSocket::successorRequestReciever(QMap<QString, QVariant> map, Peer* peer
 void NetSocket::successorResponseReciever(QMap<QString, QVariant> map, Peer* peer)
 {
   if (map["Dest"].toString() == originID) {
-    if (!dHTManager->isInDHT()) {
-      dHTManager->join(peer);
-    }
-  } else {
-    // Forward
-  }
+    if (!dHTManager->isInDHT())
+      dHTManager->join(peer, map);
+    else
+      emit updateFingerTable(map);
+  } else
+    qDebug() << "ya fucked up: " << map;
+}
+
+void NetSocket::updateIndexReciever(QVariantMap map)
+{
+  emit updateIndex(map);
 }

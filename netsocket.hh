@@ -47,6 +47,7 @@ class NetSocket : public QUdpSocket
     void joinDHTReciever(QMap<QString, QVariant> map, Peer* peer);
     void successorRequestReciever(QMap<QString, QVariant> map, Peer* peer);
     void successorResponseReciever(QMap<QString, QVariant> map, Peer* peer);
+    void updateIndexReciever(QVariantMap map);
 
     /* block/search requests from fileDialog */
     void blockRequestSender(QString str);
@@ -91,8 +92,10 @@ class NetSocket : public QUdpSocket
     void refreshSearchResults(QString fileName);
     void newSecretShare(QMap<QString, QVariant> map);
     void secretReconstructed(qint32 reconstructedSecret);
-    void successorRequest(QMap<QString, QVariant> map, Peer* peer);
+    void successorRequest(QVariantMap map, Peer* peer);
     void findSuccessor(int index, Peer* peer, QString peerOriginID);
+    void updateFingerTable(QMap<QString, QVariant> map);
+    void updateIndex(QVariantMap map);
 
   private:
     int myPortMin, myPortMax, myPort;
