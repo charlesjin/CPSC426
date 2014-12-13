@@ -177,6 +177,62 @@ void DHTManager::newPredecessor(QMap<QString, QVariant> map)
   node->hostAddress = QHostAddress(map["updateHostAddress"].toString());
 }
 
+// stabilize functions
+
+void DHTManager::stabilizeBegin() 
+{
+  // ask for successor's predecessor
+  QMap<QString, QVariant> map;
+  map.insert("StoredPredecessorRequest", this->self->index);
+  
+  emit sendDHTMessage(map, this->self->successor->port, this->self->successor->hostAddress);
+}
+
+void DHTManager::stabilize(QMap<QString, QVariant> map)
+{
+  int idx = map["StoredPredecessorResponse"].toInt();
+
+  if (idx > this->self->index && idx < this->self->successor->index) {
+    this->self->successor->index = idx;
+    this->self->successor->port = map["StoredPredecessorPort"].toUInt();
+    this->self->successor->hostAddress = QHostAddress(map["StoredPredecessorHostAddress"].toString());
+  }
+
+  QMap<QString, QVariant> msg;
+  msg.insert("Notify", this->self->index);
+  map.insert("SenderPort", this->self->port);
+  map.insert("SenderHostAddress", this->self->hostAddress.toString());
+  emit sendDHTMessage(map, this->self->successor->port, this->self->successor->hostAddress);
+}
+
+void DHTManager::notify (QMap<QString, QVariant> map) 
+{
+  int idx = map["Notify"].toUInt();
+
+  if (this->self->predecessor == NULL) {
+
+    Node *node = new Node(idx, map["NotifyPort"].toUInt(), 
+      QHostAddress(map["NotifyHostAddress"].toString()));
+  } 
+
+  else if (idx > this->self->predecessor->index && idx < this->self->index) {
+
+    this->self->predecessor->index = idx;
+    this->self->predecessor->port = map["SenderPort"].toUInt();
+    this->self->predecessor->hostAddress = QHostAddress(map["SenderHostAddress"].toString());
+  }
+}
+
+void DHTManage::sendCurrentPredecessor(Peer *peer) 
+{
+  QMap<QString, QVariant> map;
+  map.insert("StoredPredecessorResponse", this->self->predecessor->index);
+  map.insert("StoredPredecessorPort", this->self->predecessor->port);
+  map.insert("StoredPredecessorHostAddress", this->self->predecessor->hostAddress.toString())
+
+  emit sendDHTMessage(map, peer->port, peer->hostAddress.toString())
+}
+
 /*****************************/
 /*                           */
 /*            Node           */

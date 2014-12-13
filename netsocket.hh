@@ -49,6 +49,9 @@ class NetSocket : public QUdpSocket
     void successorResponseReciever(QMap<QString, QVariant> map, Peer* peer);
     void updateIndexReciever(QVariantMap map);
     void newPredecessorReciever(QMap<QString, QVariant> map);
+    void storedPredecessorRequestReciever(Peer* peer);
+    void storedPredecessorResponseReciever (QMap<QString, QVariant> map);
+    void notifyReciever(QMap<QString, QVariant> map);
 
     /* block/search requests from fileDialog */
     void blockRequestSender(QString str);
@@ -98,6 +101,9 @@ class NetSocket : public QUdpSocket
     void updateFingerTable(QMap<QString, QVariant> map);
     void updateIndex(QVariantMap map);
     void newPredecessor(QMap<QString, QVariant> map);
+    void sendCurrentPredecessor(Peer* peer);
+    void stabilize(QMap<QString, QVariant> map);
+    void notify(QMap<QString, QVariant> map);
 
   private:
     int myPortMin, myPortMax, myPort;

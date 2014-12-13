@@ -85,6 +85,13 @@ bool NetSocket::initialize()
           dHTManager, SLOT(updatePredecessor(QVariantMap)));
       connect(this, SIGNAL(newPredecessor(QVariantMap)),
           dHTManager, SLOT(newPredecessor(QVariantMap)));
+      connect(this, SIGNAL(sendCurrentPredecessor(Peer*)),
+          dHTManager, SLOT(sendCurrentPredecessor(Peer*)));
+      connect(this, SIGNAL(stabilize(QMap<QString, QVariant>)),
+          dHTManager, SLOT(stabilize(QMap<QString, QVariant>)));
+      connect(this, SIGNAL(notify(QMap<QString, QVariant>)),
+          dHTManage, SLOT(notify(QMap<QString, QVariant>)));
+
 
       // start antientropy stuff
       QTimer *aeTimer = new QTimer(this);
@@ -362,6 +369,12 @@ void NetSocket::messageReciever()
     this->newPredecessorReciever(map);
   else if (map.contains("updateIndex"))
     this->updateIndexReciever(map);
+  else if (map.contains("StoredPredecessorRequest"))
+    this->storedPredecessorRequestReciever(map, peer);
+  else if (map.contains("StoredPredecessorResponse"))
+    this->storedPredecessorResponseReciever(map);
+  else if (map.contains("Notify"))
+    this->notifyReciever(map);
   else
     qDebug() << "--------Bad Message-------" << map << "-----------------";
 
@@ -903,4 +916,18 @@ void NetSocket::newPredecessorReciever(QMap<QString, QVariant> map)
 void NetSocket::updateIndexReciever(QVariantMap map)
 {
   emit updateIndex(map);
+}
+
+void NetSocket::storedPredecessorRequestReciever(Peer* peer) 
+{
+  emit sendCurrentPredecessor(peer);
+}
+
+void NetSocket::storedPredecessorResponseReciever (QMap<QString, QVariant> map)
+{
+  emit stabilize(map);
+}
+
+void NetSocket::notifyReciever(QMap<QString, QVariant> map) {
+  emit notify(map);
 }
