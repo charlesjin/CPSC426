@@ -865,8 +865,6 @@ void NetSocket::joinDHT(Peer *peer)
 void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
 {
   QString peerOriginID = map["JoinDHTRequest"].toString();
-  qDebug() << "JOIN DHT REQUEST" << map;
-  qDebug() << "JOIN DHT REQUEST ORIGIN" << peerOriginID;
   int peerIndex = map["Index"].toInt();
 
   // Base case: you are in the DHT
@@ -885,6 +883,7 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
   // Other case: you are not in the DHT.
   // Compare your originID with the originID of the peer
   if (originID > peerOriginID) {
+    qDebug() << "I WON. INITIALIZING DHT";
     // Initialize the DHT
     dHTManager->initializeDHT();
 
