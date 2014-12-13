@@ -52,6 +52,8 @@ class NetSocket : public QUdpSocket
     void storedPredecessorRequestReciever(Peer* peer);
     void storedPredecessorResponseReciever (QMap<QString, QVariant> map);
     void notifyReciever(QMap<QString, QVariant> map);
+    void heartbeatRequestReciever(Peer* peer);
+    void heartbeatReplyReciever();
 
     /* block/search requests from fileDialog */
     void blockRequestSender(QString str);
@@ -100,14 +102,17 @@ class NetSocket : public QUdpSocket
     void successorRequest(QVariantMap map, Peer* peer);
     void updateFingerTable(QMap<QString, QVariant> map);
     void updateIndex(QVariantMap map);
+    void newPredecessor(QMap<QString, QVariant> map);
+    void sendCurrentPredecessor(Peer* peer);
+    void stabilize(QMap<QString, QVariant> map);
+    void notify(QMap<QString, QVariant> map);
+    void receivedHeartbeat();
     void fingerTableUpdatedSignal(QList<QPair<int, int> > table);
-//    void newPredecessor(QMap<QString, QVariant> map);
-//    void sendCurrentPredecessor(Peer* peer);
-//    void stabilize(QMap<QString, QVariant> map);
-//    void notify(QMap<QString, QVariant> map);
+    void updateFingerTableWithNewNode(int peerIndex, Peer *peer);
 
   private:
     int myPortMin, myPortMax, myPort;
+    QHostAddress myHostAddress;
     QString originID;
     quint32 seqNo; /* For messages */
     QMap<QString, QVariant> want; /* <originID, seqNO> */

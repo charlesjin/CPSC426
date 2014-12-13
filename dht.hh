@@ -5,6 +5,8 @@
 
 #include <QHash>
 #include <QList>
+#include <QTimer>
+
 #include "peer.hh"
 
 class FingerEntry;
@@ -49,9 +51,15 @@ class DHTManager : public QObject
     void updateFingerTable(QMap<QString, QVariant> map);
     void updatePredecessor(QVariantMap map);
     void newPredecessor(QMap<QString, QVariant> map);
-//    void stabilize(QMap<QString, QVariant> map);
-//    void notify(QMap<QString, QVariant> map);
-//    void sendCurrentPredecessor(Peer* peer);
+    void stabilizeBegin();
+    void stabilize(QMap<QString, QVariant> map);
+    void notify(QMap<QString, QVariant> map);
+    void sendCurrentPredecessor(Peer* peer);
+    void checkPredecessor();
+    void receivedHeartbeat();
+    void predecessorFailed();
+    void fixFingers();
+    void updateFingerTableWithNewNode(int peerIndex, Peer *peer);
 
   signals:
     void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
@@ -61,6 +69,11 @@ class DHTManager : public QObject
     int sizeDHT;
     Node *self;
     QString originID;
+    int next; // determines which finger table entry to refresh next
+    QTimer *stabilizeTimer;
+    QTimer *checkPredecessorTimer;
+    QTimer *failureTimer;
+    QTimer *fixFingersTimer;    
 
     QList<FingerEntry> finger;
     Node* closestPrecedingNode(int index);
@@ -69,10 +82,9 @@ class DHTManager : public QObject
     void initFingerTableHelper(int iterNum, Peer* peer);
     void initFingerTableHelper(QMap<QString, QVariant> map);
     void updateOthers();
+    bool betweenInterval(int begin, int end, int x);
     void fingerTableUpdated();
-//=======
-//    void stabilizeBegin();
-//>>>>>>> 01b5185c0ed74ed80c6db0950784229bd2de07c4
+    bool inRange(int i, int start, int end);
 };
 
 #endif // PEERSTER_DHT_HH
