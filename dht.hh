@@ -5,6 +5,8 @@
 
 #include <QHash>
 #include <QList>
+#include <QTimer>
+
 #include "peer.hh"
 
 class FingerEntry;
@@ -59,6 +61,7 @@ class DHTManager : public QObject
     int sizeDHT;
     Node *self;
     QString originID;
+    QTimer *failureTimer;
 
     QList<FingerEntry> finger;
     Node* closestPrecedingNode(int index);

@@ -90,7 +90,7 @@ bool NetSocket::initialize()
       connect(this, SIGNAL(stabilize(QMap<QString, QVariant>)),
           dHTManager, SLOT(stabilize(QMap<QString, QVariant>)));
       connect(this, SIGNAL(notify(QMap<QString, QVariant>)),
-          dHTManage, SLOT(notify(QMap<QString, QVariant>)));
+          dHTManager, SLOT(notify(QMap<QString, QVariant>)));
 
 
       // start antientropy stuff
@@ -370,7 +370,7 @@ void NetSocket::messageReciever()
   else if (map.contains("updateIndex"))
     this->updateIndexReciever(map);
   else if (map.contains("StoredPredecessorRequest"))
-    this->storedPredecessorRequestReciever(map, peer);
+    this->storedPredecessorRequestReciever(peer);
   else if (map.contains("StoredPredecessorResponse"))
     this->storedPredecessorResponseReciever(map);
   else if (map.contains("Notify"))
@@ -928,6 +928,19 @@ void NetSocket::storedPredecessorResponseReciever (QMap<QString, QVariant> map)
   emit stabilize(map);
 }
 
-void NetSocket::notifyReciever(QMap<QString, QVariant> map) {
+void NetSocket::notifyReciever(QMap<QString, QVariant> map) 
+{
   emit notify(map);
+}
+
+void NetSocket::heartbeatRequestReciever(Peer* peer) 
+{
+  QMap<QString, QVariant> map;
+  map.insert("Heartbeat", 0);
+  sendDHTMessage(map, peer->port, peer->hostAddress);
+}
+
+void NetSocket::heartbeatReplyReciever(QMap<QString, QVariant> map) 
+{
+  emit receivedHeartbeat();
 }

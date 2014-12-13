@@ -15,6 +15,16 @@ DHTManager::DHTManager(QString originID, quint16 port, QHostAddress hostAddress)
   self->predecessor = self;
   this->originID = originID;
   sizeDHT = 128;
+
+  checkPredecessorTimer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+  timer->start(10000);
+
+  failureTimer = new QTimer(this);
+  failureTimer.setSingleShot();
+  connect(timer, SIGNAL(timeout()), 
+    this, SLOT(predecessorFailed()));
+
 }
 
 int DHTManager::getIndex()
@@ -213,6 +223,7 @@ void DHTManager::notify (QMap<QString, QVariant> map)
 
     Node *node = new Node(idx, map["NotifyPort"].toUInt(), 
       QHostAddress(map["NotifyHostAddress"].toString()));
+    this->self->predecessor = node;
   } 
 
   else if (idx > this->self->predecessor->index && idx < this->self->index) {
@@ -223,14 +234,33 @@ void DHTManager::notify (QMap<QString, QVariant> map)
   }
 }
 
-void DHTManage::sendCurrentPredecessor(Peer *peer) 
+void DHTManager::sendCurrentPredecessor(Peer *peer) 
 {
   QMap<QString, QVariant> map;
   map.insert("StoredPredecessorResponse", this->self->predecessor->index);
   map.insert("StoredPredecessorPort", this->self->predecessor->port);
   map.insert("StoredPredecessorHostAddress", this->self->predecessor->hostAddress.toString())
 
-  emit sendDHTMessage(map, peer->port, peer->hostAddress.toString())
+  emit sendDHTMessage(map, peer->port, peer->hostAddress.toString());
+}
+
+void DHTManager::checkPredecessor() 
+{
+  QMap<QString, QVariant> map;
+  map.insert("Heartbeat", 0);
+  emit sendDHTMessage(map, this->self->predecessor->port, this->self->predecessor->hostAddress.toString());
+  failureTimer->start(5000);
+}
+
+void DHTManager::receivedHeartbeat() 
+{
+  failureTimer->stop();
+}
+
+void DHTManager::predecessorFailed() 
+{
+  this->self->predecessor = NULL;
+  qDebug() << "predecessor has failed";
 }
 
 /*****************************/
