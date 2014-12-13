@@ -101,6 +101,7 @@ class NetSocket : public QUdpSocket
     void updateFingerTable(QMap<QString, QVariant> map);
     void updateIndex(QVariantMap map);
     void fingerTableUpdatedSignal(QList<QPair<int, int> > table);
+    void updateFingerTableWithNewNode(int peerIndex, Peer *peer);
 //    void newPredecessor(QMap<QString, QVariant> map);
 //    void sendCurrentPredecessor(Peer* peer);
 //    void stabilize(QMap<QString, QVariant> map);
@@ -108,6 +109,7 @@ class NetSocket : public QUdpSocket
 
   private:
     int myPortMin, myPortMax, myPort;
+    QHostAddress myHostAddress;
     QString originID;
     quint32 seqNo; /* For messages */
     QMap<QString, QVariant> want; /* <originID, seqNO> */

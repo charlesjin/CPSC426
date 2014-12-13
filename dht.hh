@@ -48,6 +48,7 @@ class DHTManager : public QObject
     void updateFingerTable(QMap<QString, QVariant> map);
     void updatePredecessor(QVariantMap map);
     void newPredecessor(QMap<QString, QVariant> map);
+    void updateFingerTableWithNewNode(int peerIndex, Peer *peer);
 //    void stabilize(QMap<QString, QVariant> map);
 //    void notify(QMap<QString, QVariant> map);
 //    void sendCurrentPredecessor(Peer* peer);
@@ -67,6 +68,7 @@ class DHTManager : public QObject
     void initFingerTable(QMap<QString, QVariant> map, Peer* peer);
     void updateOthers();
     void fingerTableUpdated();
+    bool inRange(int i, int start, int end);
 //=======
 //    void stabilizeBegin();
 //>>>>>>> 01b5185c0ed74ed80c6db0950784229bd2de07c4
