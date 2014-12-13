@@ -47,6 +47,7 @@ class DHTManager : public QObject
     void successorRequest(QVariantMap map, Peer* peer);
     void updateFingerTable(QMap<QString, QVariant> map);
     void updatePredecessor(QVariantMap map);
+    void newPredecessor(QMap<QString, QVariant> map);
 
   signals:
     void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);

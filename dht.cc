@@ -123,7 +123,14 @@ void DHTManager::initFingerTable(QMap<QString, QVariant> map, Peer *peer)
       this->findSuccessor(finger[i].start, peer, originID);
     }
   }
+
   // update successor
+  QMap<QString, QVariant> updateMap;
+  updateMap.insert("updateIndex", this->self->index);
+  updateMap.insert("updatePort", this->self->port);
+  updateMap.insert("updateHostAddress", this->self->hostAddress.toString());
+  updateMap.insert("newPredecessor", this->originID);
+  emit sendDHTMessage(updateMap, this->self->successor->port, this->self->successor->hostAddress);
 }
 
 void DHTManager::updateOthers()
@@ -160,6 +167,14 @@ void DHTManager::updateFingerTable(QMap<QString, QVariant> map)
   Node *node = new Node(map["SuccessorResponse"].toUInt(), map["SuccessorPort"].toUInt(),
     QHostAddress(map["SuccessorHostAddress"].toString()));
   finger[fingerIdx].node = node;
+}
+
+void DHTManager::newPredecessor(QMap<QString, QVariant> map)
+{
+  Node *node = this->self->predecessor;
+  node->index = map["updateIndex"].toUInt();
+  node->port = map["updatePort"].toUInt();
+  node->hostAddress = QHostAddress(map["updateHostAddress"].toString());
 }
 
 /*****************************/

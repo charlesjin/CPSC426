@@ -48,6 +48,7 @@ class NetSocket : public QUdpSocket
     void successorRequestReciever(QMap<QString, QVariant> map, Peer* peer);
     void successorResponseReciever(QMap<QString, QVariant> map, Peer* peer);
     void updateIndexReciever(QVariantMap map);
+    void newPredecessorReciever(QMap<QString, QVariant> map);
 
     /* block/search requests from fileDialog */
     void blockRequestSender(QString str);
@@ -96,6 +97,7 @@ class NetSocket : public QUdpSocket
     void findSuccessor(int index, Peer* peer, QString peerOriginID);
     void updateFingerTable(QMap<QString, QVariant> map);
     void updateIndex(QVariantMap map);
+    void newPredecessor(QMap<QString, QVariant> map);
 
   private:
     int myPortMin, myPortMax, myPort;

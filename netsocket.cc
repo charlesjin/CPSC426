@@ -83,6 +83,8 @@ bool NetSocket::initialize()
           dHTManager, SLOT(updateFingerTable(QMap<QString, QVariant>)));
       connect(this, SIGNAL(updateIndex(QVariantMap)),
           dHTManager, SLOT(updatePredecessor(QVariantMap)));
+      connect(this, SIGNAL(newPredecessor(QVariantMap)),
+          dHTManager, SLOT(newPredecessor(QVariantMap)));
 
       // start antientropy stuff
       QTimer *aeTimer = new QTimer(this);
@@ -356,6 +358,8 @@ void NetSocket::messageReciever()
     this->statusReciever(map, peer);
   else if (map.contains("JoinDHTRequest"))
     this->joinDHTReciever(map, peer);
+  else if (map.contains("newPredecessor"))
+    this->newPredecessorReciever(map);
   else if (map.contains("updateIndex"))
     this->updateIndexReciever(map);
   else
@@ -889,6 +893,11 @@ void NetSocket::successorResponseReciever(QMap<QString, QVariant> map, Peer* pee
       emit updateFingerTable(map);
   } else
     qDebug() << "ya fucked up: " << map;
+}
+
+void NetSocket::newPredecessorReciever(QMap<QString, QVariant> map)
+{
+  emit newPredecessor(map);
 }
 
 void NetSocket::updateIndexReciever(QVariantMap map)
