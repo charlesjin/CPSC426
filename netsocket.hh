@@ -45,6 +45,8 @@ class NetSocket : public QUdpSocket
     void chatReciever(QMap<QString, QVariant> map, Peer* peer);
     void statusReciever(QMap<QString, QVariant> map, Peer* peer);
     void joinDHTReciever(QMap<QString, QVariant> map, Peer* peer);
+    void successorRequestReciever(QMap<QString, QVariant> map, Peer* peer);
+    void successorResponseReciever(QMap<QString, QVariant> map, Peer* peer);
 
     /* block/search requests from fileDialog */
     void blockRequestSender(QString str);
@@ -81,6 +83,7 @@ class NetSocket : public QUdpSocket
 
     /* DHT */
     void joinDHT(Peer *peer);
+    void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
 
   signals:
     void messageRecieved(QVariant chatText);
@@ -88,6 +91,8 @@ class NetSocket : public QUdpSocket
     void refreshSearchResults(QString fileName);
     void newSecretShare(QMap<QString, QVariant> map);
     void secretReconstructed(qint32 reconstructedSecret);
+    void successorRequest(QMap<QString, QVariant> map, Peer* peer);
+    void findSuccessor(int index, Peer* peer, QString peerOriginID);
 
   private:
     int myPortMin, myPortMax, myPort;

@@ -37,35 +37,37 @@ class DHTManager : public QObject
 
   public:
     DHTManager(quint16 port, QHostAddress hostAddress);
-    void join(Node* nn, Peer *peer);
+    bool isInDHT();
+    void join(Node* nn, Peer* peer);
     void join(Peer* peer);
     int getIndex();
 
   public slots:
+    Node* findSuccessor(int index, Peer* peer, QString peerOriginID);
     /* init */
-    void initFingerTable(QMap<QString, QVariant> map, Peer *peer);
-    void initFingerTable(QMap<QString, QVariant> map, Peer *peer, int i);
+    void initFingerTable(QMap<QString, QVariant> map, Peer* peer);
+    void initFingerTable(QMap<QString, QVariant> map, Peer* peer, int i);
+    void successorRequest(QMap<QString, QVariant> map, Peer* peer);
 
   signals:
-    void findSuccessor(int i, Peer *peer);
+//    void findSuccessor(int i, Peer *peer);
+    void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
 
   private:
     int sizeDHT;
-    Node *predecessor;
-    Node *successor;
     Node *self;
 
     QList<FingerEntry> finger;
-    Node *findSuccessor(int id);
-    Node *findPredecessor(int id);
-    Node *closestPrecedingFinger(int id);
-    void initFingerTable(Node *nn);
+    Node* closestPrecedingNode(int index);
+    void askForSuccessor(Node* nn, int index, Peer* peer, QString peerOriginID);
+    void initFingerTable(Node* nn);
     void updateOthers();
-    void updateFingerTable(Node *nn, int i);
+    void updateFingerTable(Node* nn, int i);
+
 
     /* init */
-    void initFingerTable(Node *nn, Peer *peer);
-    void initFingerTable(Node *nn, int i);
+    void initFingerTable(Node* nn, Peer* peer);
+    void initFingerTable(Node* nn, int i);
 };
 
 #endif // PEERSTER_DHT_HH

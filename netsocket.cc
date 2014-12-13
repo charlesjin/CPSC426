@@ -73,6 +73,12 @@ bool NetSocket::initialize()
       dHTManager = new DHTManager(p, QHostAddress::LocalHost);
       connect(peerManager, SIGNAL(joinDHT(Peer *)),
           this, SLOT(joinDHT(Peer *)));
+      connect(dHTManager, SIGNAL(sendDHTMessage(QVariantMap, quint16, QHostAddress)),
+          this, SLOT(sendDHTMessage(QVariantMap, quint16, QHostAddress)));
+      connect(this, SIGNAL(successorRequest(QVariantMap, Peer*)),
+          dHTManager, SLOT(successorRequest(QVariantMap, Peer *)));
+      connect(this, SIGNAL(findSuccessor(int, Peer*)),
+          dHTManager, SLOT(findSuccessor(int, Peer*)));
 
       // start antientropy stuff
       QTimer *aeTimer = new QTimer(this);
@@ -334,7 +340,9 @@ void NetSocket::messageReciever()
   if (map.contains("LastIP") && map.contains("LastPort"))
     peerManager->checkPeer(map["LastIP"].toUInt(), map["LastPort"].toUInt());
 
-  if (map.contains("Dest"))
+  if (map.contains("SuccessorRequest"))
+    this->successorRequestReciever(map, peer);
+  else if (map.contains("Dest"))
     this->directMessageReciever(map, peer);
   else if (map.contains("Search"))
     this->searchRequestReciever(map, peer);
@@ -825,21 +833,54 @@ void NetSocket::joinDHT(Peer *peer)
 
 void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
 {
+  QString peerOriginID = map["JoinDHTRequest"].toString();
+  int peerIndex = map["Index"].toInt();
+
   // Base case: you are in the DHT
-  // Send back finger[1].start
+  // Send back the successor of peerIndex + 1 and the predecessor of that
+  // successor
+  if (dHTManager->isInDHT()) {
+    emit findSuccessor(peerIndex + 1, peer, peerOriginID);
+    return;
+  }
 
   // Other case: you are not in the DHT.
   // Compare your originID with the originID of the peer
-  QString peerOriginID = map["JoinDHTRequest"].toString();
-  int peerIndex = map["Index"].toInt();
   if (originID > peerOriginID) {
     // Initialize the DHT
     dHTManager->join(NULL, peer);
 
-    // Send back finger[1].start
+    // Send back the successor of peerIndex + 1 and the predecessor of that
+    // successor
+    emit findSuccessor(peerIndex + 1, peer, peerOriginID);
   } else {
     // Ask the peer to initialize the DHT
     joinDHT(peer);
   }
 }
 
+void NetSocket::sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress)
+{
+  QByteArray message;
+  QDataStream * stream = new QDataStream(&message, QIODevice::WriteOnly);
+  (*stream) << map;
+  delete stream;
+
+  this->writeDatagram (message.data(), message.size(), hostAddress, port);
+}
+
+void NetSocket::successorRequestReciever(QMap<QString, QVariant> map, Peer* peer)
+{
+  emit successorRequest(map, peer);
+}
+
+void NetSocket::successorResponseReciever(QMap<QString, QVariant> map, Peer* peer)
+{
+  if (map["Dest"].toString() == originID) {
+    if (!dHTManager->isInDHT()) {
+      dHTManager->join(peer);
+    }
+  } else {
+    // Forward
+  }
+}
