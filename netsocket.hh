@@ -85,6 +85,7 @@ class NetSocket : public QUdpSocket
     /* DHT */
     void joinDHT(Peer *peer);
     void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
+    void fingerTableUpdated(QList<QPair<int, int> > table);
 
   signals:
     void messageRecieved(QVariant chatText);
@@ -93,9 +94,9 @@ class NetSocket : public QUdpSocket
     void newSecretShare(QMap<QString, QVariant> map);
     void secretReconstructed(qint32 reconstructedSecret);
     void successorRequest(QVariantMap map, Peer* peer);
-    void findSuccessor(int index, Peer* peer, QString peerOriginID);
     void updateFingerTable(QMap<QString, QVariant> map);
     void updateIndex(QVariantMap map);
+    void fingerTableUpdatedSignal(QList<QPair<int, int> > table);
 
   private:
     int myPortMin, myPortMax, myPort;

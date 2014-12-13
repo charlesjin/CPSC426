@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QtCrypto>
 #include <QKeyEvent>
+#include <QHeaderView>
 
 #include "main.hh"
 #include "netsocket.hh"
@@ -98,9 +99,24 @@ ChatDialog::ChatDialog()
   chatLayout->addLayout(fileLayout);
   chatLayout->addLayout(secretLayout);
 
+  QLabel *fingerLabel = new QLabel(this);
+  fingerLabel->setText("Finger Table");
+  dHTFingerTable = new QTableWidget(this);
+  dHTFingerTable->setColumnCount(2);
+  dHTFingerTable->setRowCount(7);
+  QStringList headers;
+  headers << "Start" << "Node";
+  dHTFingerTable->setHorizontalHeaderLabels(headers);
+  dHTFingerTable->verticalHeader()->setVisible(false);
+
+  QVBoxLayout *dHTLayout = new QVBoxLayout();
+  dHTLayout->addWidget(fingerLabel);
+  dHTLayout->addWidget(dHTFingerTable);
+
   QHBoxLayout *layout = new QHBoxLayout();
   layout->addLayout(peerLayout, 1);
   layout->addLayout(chatLayout, 0);
+  layout->addLayout(dHTLayout);
   this->setLayout(layout);
   textedit->setFocus();
 
@@ -270,6 +286,16 @@ void ChatDialog::newSecretRecieved(QString secretID)
 void ChatDialog::secretReconstructed(qint32 reconstructedSecret)
 {
   emit showReconstructedSecret(reconstructedSecret);
+}
+
+void ChatDialog::fingerTableUpdated(QList<QPair<int, int> >table)
+{
+  for (int i = 0; i < table.size(); i++) {
+    QTableWidgetItem *item1 = new QTableWidgetItem(QString::number(table[i].first));
+    QTableWidgetItem *item2 = new QTableWidgetItem(QString::number(table[i].second));
+    dHTFingerTable->setItem(i, 0, item1);
+    dHTFingerTable->setItem(i, 1, item2);
+  }
 }
 
 /*****************************/
@@ -599,8 +625,11 @@ int main(int argc, char **argv)
       sock, SLOT(recoverSecret(QString)));
   QObject::connect(sock, SIGNAL(secretReconstructed(qint32)),
       dialog, SLOT(secretReconstructed(qint32)));
+  QObject::connect(sock, SIGNAL(fingerTableUpdatedSignal(QList<QPair<int, int> >)),
+      dialog, SLOT(fingerTableUpdated(QList<QPair<int, int> >)));
 
   // Enter the Qt main loop; everything else is event driven
+
   return app.exec();
 }
 

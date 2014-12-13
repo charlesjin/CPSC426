@@ -50,6 +50,7 @@ class DHTManager : public QObject
 
   signals:
     void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
+    void fingerTableUpdatedSignal(QList<QPair<int, int> >);
 
   private:
     int sizeDHT;
@@ -61,6 +62,7 @@ class DHTManager : public QObject
     void askForSuccessor(Node* nn, int index, Peer* peer, QString peerOriginID);
     void initFingerTable(QMap<QString, QVariant> map, Peer* peer);
     void updateOthers();
+    void fingerTableUpdated();
 };
 
 #endif // PEERSTER_DHT_HH

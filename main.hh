@@ -12,6 +12,7 @@
 #include <QStyle>
 #include <QStyleOptionFrameV2>
 #include <QApplication>
+#include <QTableWidget>
 
 class ChatDialog : public QDialog
 {
@@ -40,6 +41,7 @@ class ChatDialog : public QDialog
     void clickedRecoverSecret();
     void secretClicked(QListWidgetItem* secret);
     void secretReconstructed(qint32 reconstructedSecret);
+    void fingerTableUpdated(QList<QPair<int, int> > table);
 
   signals:
     void sendMessage(QMap<QString, QVariant> map);
@@ -59,6 +61,7 @@ class ChatDialog : public QDialog
     QListWidget *peerview;
     QPushButton *button;
     QStringList *secretList;
+    QTableWidget *dHTFingerTable;
 };
 
 class TextEdit : public QTextEdit
