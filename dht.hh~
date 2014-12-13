@@ -66,11 +66,10 @@ class DHTManager : public QObject
     int sizeDHT;
     Node *self;
     QString originID;
-    int next; // determines which finger table entry to refresh next
     QTimer *stabilizeTimer;
     QTimer *checkPredecessorTimer;
     QTimer *failureTimer;
-    QTimer *fixFingersTimer;    
+    int next; // determines which finger table entry to refresh next
 
     QList<FingerEntry> finger;
     Node* closestPrecedingNode(int index);

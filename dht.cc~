@@ -18,10 +18,10 @@ DHTManager::DHTManager(QString originID, quint16 port, QHostAddress hostAddress)
   
   next = 0;
 
-  stabilizeTimer = new QTimer(this);
+/*  stabilizeTimer = new QTimer(this);
   connect(stabilizeTimer, SIGNAL(timeout()), 
     this, SLOT(stabilizeBegin()));
-  stabilizeTimer->start(7000);
+  stabilizeTimer->start(7000);*/
 
   checkPredecessorTimer = new QTimer(this);
   connect(checkPredecessorTimer, SIGNAL(timeout()), 
