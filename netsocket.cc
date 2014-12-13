@@ -372,7 +372,7 @@ void NetSocket::messageReciever()
 
   Peer *peer = peerManager->checkPeer(sender, senderPort);
 
-  qDebug() << "GOT MESSAGE: " << map;
+  //qDebug() << "GOT MESSAGE: " << map;
 
   if (map.contains("LastIP") && map.contains("LastPort"))
     peerManager->checkPeer(map["LastIP"].toUInt(), map["LastPort"].toUInt());
