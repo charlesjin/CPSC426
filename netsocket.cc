@@ -357,8 +357,6 @@ void NetSocket::messageReciever()
 
   if (map.contains("SuccessorRequest"))
     this->successorRequestReciever(map, peer);
-  else if (map.contains("SuccessorResponse"))   // missing from my
-    this->successorResponseReciever(map, peer); // code?
   else if (map.contains("Dest"))
     this->directMessageReciever(map, peer);
   else if (map.contains("Search"))

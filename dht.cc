@@ -214,6 +214,8 @@ bool DHTManager::betweenInterval(int begin, int end, int x)
 
 void DHTManager::stabilizeBegin() 
 {
+  if (!isInDHT()) return;
+  
   // ask for successor's predecessor
   QMap<QString, QVariant> map;
   map.insert("StoredPredecessorRequest", this->self->index);
@@ -264,10 +266,13 @@ void DHTManager::sendCurrentPredecessor(Peer *peer)
 
 void DHTManager::checkPredecessor() 
 {
+  if (!isInDHT()) return;
+  
   QMap<QString, QVariant> map;
   map.insert("HeartbeatRequest", 0);
   emit sendDHTMessage(map, this->self->predecessor->port, this->self->predecessor->hostAddress);
-  qDebug() << "sent heartbeat request to " << this->self->predecessor->port;
+
+  qDebug() << this->self->port << " sent heartbeat request to " << this->self->predecessor->port;
   failureTimer->start(3000);
 }
 
@@ -284,13 +289,25 @@ void DHTManager::predecessorFailed()
 }
 
 void DHTManager::fixFingers()
-{
+{ 
+  if (!isInDHT()) return;
   
   next = next + 1;
   if (next > 7)
     next = 0;
   
   // update finger[next] = find_successor(n+2^
+  //
+  //  call
+  //  Node *DHTManager::findSuccessor(int index, Peer *peer, QString peerOriginID)
+  // if the response is null, then we're done because it will call updatefingertable
+  // otherwise, we need to manually update the finger table entry because it will return a node
+  // if node x != NULL, then finger[next].node = x
+  
+  
+  // findSuccessor(finger[i].start, who sent the message, origin;
+  // do something like finger[i].node = find_successor(finger[i].start);
+  
 }
 
 /*****************************/
