@@ -44,6 +44,11 @@ int DHTManager::getIndex()
   return self->index;
 }
 
+int DHTManager::getSize()
+{
+  return sizeDHT;
+}
+
 void DHTManager::successorRequest(QMap<QString, QVariant> map, Peer *peer)
 {
   qDebug() << "SUCCESSOR REQUEST" << map;

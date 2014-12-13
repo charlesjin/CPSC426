@@ -36,11 +36,11 @@ class ChatDialog : public QDialog
     void searchItemClicked(QListWidgetItem* item);
     void gotSearchResult(QString fileName);
     void clickedShareSecret();
-    void newSecret(quint32);
+    void newSecret(QString);
     void newSecretRecieved(QString secretID);
     void clickedRecoverSecret();
     void secretClicked(QListWidgetItem* secret);
-    void secretReconstructed(qint32 reconstructedSecret);
+    void secretReconstructed(QString reconstructedSecret);
     void fingerTableUpdated(QList<QPair<int, int> > table);
 
   signals:
@@ -51,9 +51,9 @@ class ChatDialog : public QDialog
     void newFileRequest(QMap<QString, QVariant> map);
     void showSearchResult(QString fileName);
     void newFileRequestFromSearch(QMap<QString, QVariant> map);
-    void shareSecret(quint32 secret);
+    void shareSecret(QString secret);
     void recoverSecret(QString secretID);
-    void showReconstructedSecret(qint32 reconstructedSecret);
+    void showReconstructedSecret(QString reconstructedSecret);
 
   private:
     QTextEdit *textview;
@@ -165,7 +165,7 @@ class ShareSecretDialog : public QDialog
     void gotReturnPressed();
 
   signals:
-    void enteredSecret(quint32 secret);
+    void enteredSecret(QString secret);
 
   private:
     QLineEdit *secretLine;
@@ -183,7 +183,7 @@ class RecoverSecretDialog : public QDialog
 
   public slots:
     void closeDialog();
-    void showReconstructedSecret(qint32 reconstructedSecret);
+    void showReconstructedSecret(QString reconstructedSecret);
 
   signals:
 

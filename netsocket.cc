@@ -67,8 +67,8 @@ bool NetSocket::initialize()
       secretManager->setParent(this);
       connect(this, SIGNAL(newSecretShare(QMap<QString, QVariant>)),
           secretManager, SLOT(newSecretShare(QMap<QString, QVariant>)));
-      connect(secretManager, SIGNAL(secretRecovered(qint32)),
-          this, SLOT(secretRecovered(qint32)));
+      connect(secretManager, SIGNAL(secretRecovered(QString)),
+          this, SLOT(secretRecovered(QString)));
 
       fileManager = new FileManager();
       fileManager->setParent(this);
@@ -765,7 +765,11 @@ void NetSocket::secretShareReciever(QMap<QString, QVariant> map)
   QMap <QString, QVariant> secretMap;
   QVariantList secretList = map["SecretShare"].toList();
 
+  secretMap.insert("Seed", map["Seed"]);
+  secretMap.insert("Message", map["Message"]);
   secretMap.insert("Threshold", map["Threshold"]);
+  secretMap.insert("Seed", map["Seed"]);
+  secretMap.insert("Message", map["Message"]);
   if (!secretList.isEmpty()){
     secretMap.insert("x", secretList.first());
     secretMap.insert("fx", secretList.last());
@@ -797,7 +801,7 @@ void NetSocket::secretReplyReciever(QMap<QString, QVariant> map)
   emit newSecretShare(map);
 }
 
-void NetSocket::sendSecret(quint32 secret)
+void NetSocket::sendSecret(QString secret)
 {
 
   // Get the number of nodes in the network to determine the threshold
@@ -806,19 +810,30 @@ void NetSocket::sendSecret(quint32 secret)
   // Let the threshold k be 75% of the total number of nodes.
   quint16 numNodes = peerManager->routingTable.size() + 1;
   // quint16 threshold = (numNodes * 3) / 4;
-  quint16 threshold = numNodes;
+  quint16 threshold = numNodes - 1;
+
+
+  qint32 secretKey = qrand() % 1298831;
 
   // Break up the secret into n shares, where n is the number of nodes.
   QList<QPair<qint16, qint64> > secretShares =
-    ShamirSecret::generateSecrets(secret, numNodes, threshold);
+    ShamirSecret::generateSecrets(secretKey, numNodes, threshold);
 
-  int seed = qrand() % 1024;
+  qint32 seed = qrand() % 1024;
+
+  QString secretMessage = ShamirSecret::encryptMessage(secret, secretKey, QByteArray(QString::number(seed).toAscii().data()));
+  
+  // QList<int> list = ShamirSecret::generatePoints(seed, numNodes, dHTManager->getSize());
+  // QList<QPair<qint16, QHostAddress> >routes;
+  // routes = dHTManager->getRoutes(list);
 
   // Build the message skeleton.
   QMap<QString, QVariant> secretMsg;
   secretMsg.insert("SecretNo", secretNo++);
   secretMsg.insert("Threshold", threshold);
-  
+  secretMsg.insert("Seed", seed);
+  secretMsg.insert("Message", secretMessage);
+
   QHash<QString, QPair<QHostAddress, quint16> >::iterator i;
   QHash<QString, QPair<QHostAddress, quint16> >routingTable = peerManager->routingTable;
   int j = 0;
@@ -855,6 +870,8 @@ void NetSocket::recoverSecret(QString secretID)
     shareMap.insert("x", secret["x"]);
     shareMap.insert("fx", secret["fx"]);
     shareMap.insert("Threshold", secret["Threshold"]);
+    shareMap.insert("Message", secret["Message"]);
+    shareMap.insert("Seed", secret["Seed"]);
     emit newSecretShare(shareMap);
 
     QMap<QString, QVariant> recoverMsg;
@@ -862,6 +879,11 @@ void NetSocket::recoverSecret(QString secretID)
 
     QHash<QString, QPair<QHostAddress, quint16> >::iterator i;
     QHash<QString, QPair<QHostAddress, quint16> >routingTable = peerManager->routingTable;
+
+    // QList<int> list = ShamirSecret::generatePoints(seed, numNodes, dHTManager->getSize());
+    // QList<QPair<qint16, QHostAddress> >routes;
+    // routes = dHTManager->getRoutes(list);
+
     for (i = routingTable.begin(); i != routingTable.end(); i++){
       recoverMsg.insert("Dest", i.key());
       sendDirectMessage(recoverMsg);
@@ -869,7 +891,7 @@ void NetSocket::recoverSecret(QString secretID)
   }
 }
 
-void NetSocket::secretRecovered(qint32 recoveredSecret)
+void NetSocket::secretRecovered(QString recoveredSecret)
 {
   emit secretReconstructed(recoveredSecret);
 }

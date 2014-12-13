@@ -6,6 +6,7 @@
 
 #include <ctime>
 #include <cmath>
+#include <QtCrypto>
 
 #include <QtCore>
 
@@ -43,7 +44,6 @@ QList<QPair<qint16, qint64> > ShamirSecret::generateSecrets(qint32 secret, qint1
 		response << qMakePair(i, value);
 	}
 
-	qDebug() << response;
 	return response;
 }
 
@@ -61,4 +61,50 @@ qint32 ShamirSecret::solveSecret(QList<QPair<qint16, qint64> > points)
 		response += term;
 	}
 	return (qint32) round(response);
+}
+
+QList<int> ShamirSecret::generatePoints(qint32 seed, qint16 noPlayers, int sizeDHT)
+{
+	QList<int> list;
+	for (int i = 0; i < noPlayers; i++){
+		list << ((seed * 2038074133+48487) & sizeDHT);
+	}
+	return list;
+}
+
+QString ShamirSecret::encryptMessage(QString secret, qint32 secretKey, QByteArray init)
+{
+	QCA::SecureArray key(secretKey);
+	QCA::SymmetricKey keyObject(key);
+	QCA::InitializationVector iv(init);
+
+	QCA::Cipher cipher(QString("aes128"),QCA::Cipher::CBC,
+    QCA::Cipher::DefaultPadding,
+    QCA::Encode,
+    keyObject, iv);
+
+	QCA::SecureArray arg = secret.toAscii();
+	QCA::SecureArray u = cipher.update(arg);
+	QCA::SecureArray f = cipher.final();
+	QCA::SecureArray cipherText = u.append(f);
+
+	return QCA::arrayToHex(cipherText.toByteArray());
+}
+
+QString ShamirSecret::decryptMessage(QByteArray encryptedMessage, qint32 secretKey, QByteArray init)
+{
+
+	QCA::SecureArray key(secretKey);
+	QCA::SymmetricKey keyObject(key);
+	QCA::InitializationVector iv(init);
+
+	QCA::Cipher cipher(QString("aes128"),QCA::Cipher::CBC,
+    QCA::Cipher::DefaultPadding,
+    QCA::Decode,
+    keyObject, iv);
+
+	QCA::SecureArray plainText = cipher.update(encryptedMessage);
+	plainText = cipher.final();
+
+	return plainText.data();
 }

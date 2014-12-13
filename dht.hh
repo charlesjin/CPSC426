@@ -43,6 +43,7 @@ class DHTManager : public QObject
     void initializeDHT(int peerIndex, quint16 port, QHostAddress hostAddress);
     void join(Peer* peer, QMap<QString, QVariant> map);
     int getIndex();
+    int getSize();
 
   public slots:
     Node* findSuccessor(int index, Peer* peer, QString peerOriginID,
