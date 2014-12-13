@@ -38,12 +38,13 @@ class DHTManager : public QObject
   public:
     DHTManager(QString originID, quint16 port, QHostAddress hostAddress);
     bool isInDHT();
-    void initializeDHT();
+    void initializeDHT(int peerIndex, quint16 port, QHostAddress hostAddress);
     void join(Peer* peer, QMap<QString, QVariant> map);
     int getIndex();
 
   public slots:
-    Node* findSuccessor(int index, Peer* peer, QString peerOriginID);
+    Node* findSuccessor(int index, Peer* peer, QString peerOriginID,
+        int fingerEntryNum);
     void successorRequest(QVariantMap map, Peer* peer);
     void updateFingerTable(QMap<QString, QVariant> map);
     void updatePredecessor(QVariantMap map);
@@ -63,8 +64,10 @@ class DHTManager : public QObject
 
     QList<FingerEntry> finger;
     Node* closestPrecedingNode(int index);
-    void askForSuccessor(Node* nn, int index, Peer* peer, QString peerOriginID);
+    void askForSuccessor(Node* nn, int index, Peer* peer, QString peerOriginID, int fingerEntryNum);
     void initFingerTable(QMap<QString, QVariant> map, Peer* peer);
+    void initFingerTableHelper(int iterNum, Peer* peer);
+    void initFingerTableHelper(QMap<QString, QVariant> map);
     void updateOthers();
     void fingerTableUpdated();
 //=======

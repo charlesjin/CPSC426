@@ -872,7 +872,7 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
   // successor
   if (dHTManager->isInDHT()) {
     QVariantMap newMap;
-    newMap.insert("SucessorRequest", peerIndex + 1);
+    newMap.insert("SuccessorRequest", peerIndex + 1);
     newMap.insert("Origin", peerOriginID);
     newMap.insert("RequestPort", peer->port);
     newMap.insert("RequestHostAddress", peer->hostAddress.toString());
@@ -885,12 +885,12 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
   if (originID > peerOriginID) {
     qDebug() << "I WON. INITIALIZING DHT";
     // Initialize the DHT
-    dHTManager->initializeDHT();
+    dHTManager->initializeDHT(peerIndex, peer->port, peer->hostAddress);
 
     // Send back the successor of peerIndex + 1 and the predecessor of that
     // successor
     QVariantMap newMap;
-    newMap.insert("SucessorRequest", peerIndex + 1);
+    newMap.insert("SuccessorRequest", peerIndex + 1);
     newMap.insert("Origin", peerOriginID);
     newMap.insert("RequestPort", peer->port);
     newMap.insert("RequestHostAddress", peer->hostAddress.toString());
@@ -903,7 +903,8 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
 
 void NetSocket::sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress)
 {
-  qDebug() << "Sending " << map;
+  qDebug() << "Sending DHT Message" << map;
+  qDebug() << "";
 
   QByteArray message;
   QDataStream * stream = new QDataStream(&message, QIODevice::WriteOnly);
@@ -916,12 +917,14 @@ void NetSocket::sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostA
 void NetSocket::successorRequestReciever(QMap<QString, QVariant> map, Peer* peer)
 {
   qDebug() << "SReqst Received " << map;
+  qDebug() << "";
   emit successorRequest(map, peer);
 }
 
 void NetSocket::successorResponseReciever(QMap<QString, QVariant> map, Peer* peer)
 {
   qDebug() << "SResp Received " << map;
+  qDebug() << "";
   if (map["Dest"].toString() == originID) {
     if (!dHTManager->isInDHT())
       dHTManager->join(peer, map);

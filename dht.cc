@@ -26,9 +26,20 @@ int DHTManager::getIndex()
 
 void DHTManager::successorRequest(QMap<QString, QVariant> map, Peer *peer)
 {
-  Node *nn = findSuccessor(map["SuccessorRequest"].toInt(), peer, map["Origin"].toString());
+  qDebug() << "SUCCESSOR REQUEST" << map;
+  qDebug() << "";
+  Node *nn = findSuccessor(map["SuccessorRequest"].toInt(), peer, map["Origin"].toString(),
+      map["FingerEntryNum"].toInt());
   if (nn != NULL) {
-    // Send message back
+    // You are the successor. Update your predecessor and send message back.
+    // REALLY NEED TO CHECK THIS
+    if (nn->index == this->self->index) {
+      qDebug() << "I am the successor" << this->self->index << this->self->successor->index;
+      qDebug() << "";
+      this->self->predecessor = new Node(map["SuccessorRequest"].toInt() - 1,
+          map["RequestPort"].toUInt(), QHostAddress(map["RequestHostAddress"].toString()));
+    }
+
     QVariantMap newMap;
     newMap.insert("SuccessorResponse", nn->index);
     newMap.insert("SuccessorPort", nn->port);
@@ -38,25 +49,29 @@ void DHTManager::successorRequest(QMap<QString, QVariant> map, Peer *peer)
     newMap.insert("PredecessorHostAddress", this->self->hostAddress.toString());
     newMap.insert("Dest", map["Origin"].toString());
     newMap.insert("Index", map["SuccessorRequest"].toInt());
-
-    qDebug() << "Sending DHT Message back";
+    newMap.insert("FingerEntryNum", map["FingerEntryNum"].toInt());
 
     emit sendDHTMessage(newMap, map["RequestPort"].toUInt(), QHostAddress(map["RequestHostAddress"].toString()));
   }
 }
 
-Node *DHTManager::findSuccessor(int index, Peer *peer, QString peerOriginID)
+Node *DHTManager::findSuccessor(int index, Peer *peer, QString peerOriginID, int fingerEntryNum)
 {
+  qDebug() << "FIND SUCCESSOR" << index;
+  qDebug() << "";
   index = index % sizeDHT;
-  if (index > this->self->index && index <= this->self->successor->index) {
+  int me = index;
+  int low = this->self->index;
+  int high = this->self->successor->index;
+  if ((low < high && me > low && me <= high) || (low > high && (me > low || me < high))) {
     return this->self->successor;
   } else {
     Node *nn = closestPrecedingNode(index);
-    if (nn == this->self) {
+    if (nn->index == this->self->index) {
       return this->self;
     }
     // Ask nn to find the successor of index and return that node
-    askForSuccessor(nn, index, peer, peerOriginID);
+    askForSuccessor(nn, index, peer, peerOriginID, fingerEntryNum);
     return NULL;
   }
 }
@@ -65,15 +80,20 @@ Node *DHTManager::closestPrecedingNode(int index)
 {
   index = index % sizeDHT;
   for (int i = finger.size() - 1; i >= 0; i--) {
-    if (finger[i].start > this->self->index && finger[i].start < index) {
+    int me = finger[i].node->index;
+    int low = this->self->index;
+    int high = index;
+    if ((low < high && me > low && me < high) || (low > high && (me > low || me < high))) {
       return finger[i].node;
     }
   }
   return this->self;
 }
 
-void DHTManager::askForSuccessor(Node* nn, int index, Peer *peer, QString peerOriginID)
+void DHTManager::askForSuccessor(Node* nn, int index, Peer *peer, QString peerOriginID, int fingerEntryNum)
 {
+  qDebug() << "ASK FOR SUCCESSOR" << nn->port << "" << nn->hostAddress;
+  qDebug() << "";
   index = index % sizeDHT;
 
   QVariantMap map;
@@ -81,12 +101,12 @@ void DHTManager::askForSuccessor(Node* nn, int index, Peer *peer, QString peerOr
   map.insert("RequestPort", peer->port);
   map.insert("RequestHostAddress", peer->hostAddress.toString());
   map.insert("Origin", peerOriginID);
+  map.insert("FingerEntryNum", fingerEntryNum);
 
   if (nn == NULL) {
     qDebug() << "PROBLEM";
     return;
   }
-  qDebug() << "stuff" << nn->port << " "  << nn->hostAddress;
   if (nn->port == 0) {
     qDebug() << "PROBLEM" << nn;
     return;
@@ -100,7 +120,7 @@ bool DHTManager::isInDHT()
 }
 
 // This is the first node in the network
-void DHTManager::initializeDHT()
+void DHTManager::initializeDHT(int peerIndex, quint16 port, QHostAddress hostAddress)
 {
   // Initialize the DHT
   for (int i = 0; i < (int) ceil(log2(this->sizeDHT)); i++) {
@@ -110,7 +130,9 @@ void DHTManager::initializeDHT()
         //this->self->hostAddress);
     finger << entry;
   }
-  this->self->predecessor = new Node(this->self->index, this->self->port, QHostAddress());
+  this->self->predecessor = new Node(peerIndex, port, hostAddress);
+  this->self->successor = new Node(peerIndex, port, hostAddress);
+      //new Node(this->self->index, this->self->port, QHostAddress());
       //this->self->hostAddress);
   fingerTableUpdated();
 }
@@ -119,7 +141,6 @@ void DHTManager::join(Peer *peer, QMap<QString, QVariant> map)
 {
   if (!peer) return;
   this->initFingerTable(map, peer);
-  this->updateOthers();
 }
 
 // CALLED DURING INIT
@@ -136,7 +157,7 @@ void DHTManager::initFingerTable(QMap<QString, QVariant> map, Peer *peer)
   FingerEntry entry;
   for (i = 0; i < (int) ceil(log2(this->sizeDHT)); i++){
     entry.start = (self->index + (int) pow(2, i)) % sizeDHT;
-    entry.node = new Node(0, 0, QHostAddress());
+    entry.node = new Node(0, peer->port, peer->hostAddress);
     //entry.node = new Node(successor->index, successor->port, successor->hostAddress);
     //entry.node = new Node(this->self->index, this->self->port, QHostAddress());
         // this->self->hostAddress);
@@ -146,30 +167,68 @@ void DHTManager::initFingerTable(QMap<QString, QVariant> map, Peer *peer)
   fingerTableUpdated();
 
   // update successor
-  QMap<QString, QVariant> updateMap;
-  updateMap.insert("updateIndex", this->self->index);
-  updateMap.insert("updatePort", this->self->port);
-  updateMap.insert("updateHostAddress", this->self->hostAddress.toString());
-  updateMap.insert("newPredecessor", this->originID);
-  emit sendDHTMessage(updateMap, this->self->successor->port, this->self->successor->hostAddress);
+//  QMap<QString, QVariant> updateMap;
+//  updateMap.insert("updateIndex", this->self->index);
+//  updateMap.insert("updatePort", this->self->port);
+//  updateMap.insert("updateHostAddress", this->self->hostAddress.toString());
+//  updateMap.insert("newPredecessor", this->originID);
+//  emit sendDHTMessage(updateMap, this->self->successor->port, this->self->successor->hostAddress);
 
   finger[0].node = new Node(successor->index, successor->port, successor->hostAddress);
-  for (i = 1; i < finger.size(); i++){
-    if (finger[i].start >= self->index && finger[i].start < finger[i-1].start){
-      finger[i].node = finger[i-1].node;
-    } else {
-      this->findSuccessor(finger[i].start, peer, originID);
-    }
-  }
-  fingerTableUpdated();
+  initFingerTableHelper(1, peer);
+}
 
+void DHTManager::initFingerTableHelper(int iterNum, Peer *peer) {
+    if (iterNum == log2(this->sizeDHT)) {
+      // Done
+      this->updateOthers();
+      fingerTableUpdated();
+      return;
+    }
+    qDebug() << "170" << finger[iterNum].start << " " << self->index << " " << finger[iterNum-1].node->index;
+    qDebug() << "";
+    int me = finger[iterNum].start;
+    int low = self->index;
+    int high = finger[iterNum-1].node->index;
+    if ((low < high && me >= low && me < high) || (low > high && (me >= low || me < high))) {
+      qDebug() << "YES" << iterNum;
+      if (finger[iterNum-1].node->index == 0) {
+        qDebug() << "PROBLEM AREA";
+      }
+      finger[iterNum].node->index = finger[iterNum-1].node->index;
+      finger[iterNum].node->port = finger[iterNum-1].node->port;
+      finger[iterNum].node->hostAddress = finger[iterNum-1].node->hostAddress;
+      initFingerTableHelper(iterNum + 1, peer);
+    } else {
+      qDebug() << "ELSE" << iterNum;
+      Peer *p = new Peer();
+      p->port = this->self->port;
+      p->hostAddress = this->self->hostAddress;
+      Node *nn = new Node(0, peer->port, peer->hostAddress);
+      this->askForSuccessor(nn, finger[iterNum].start, p, this->originID, iterNum);
+//      this->findSuccessor(finger[i].start, p, originID);
+    }
+}
+
+
+void DHTManager::initFingerTableHelper(QMap<QString, QVariant> map)
+{
+  int entryNum = map["FingerEntryNum"].toInt();
+  Peer *peer = new Peer();
+  peer->port = finger[0].node->port;
+  peer->hostAddress = finger[0].node->hostAddress;
+  initFingerTableHelper(entryNum + 1, peer);
 }
 
 void DHTManager::updateOthers()
 {
+  qDebug() << "UPDATE OTHERS";
+  qDebug() << "";
+
   QMap<QString, QVariant> map;
   map.insert("updatePort", this->self->port);
   map.insert("updateHostAddress", this->self->hostAddress.toString());
+  map.insert("updateValue", this->self->index);
 
   for (int i = 0; i < finger.size(); i ++){
     int index = this->self->index - pow(2, i);
@@ -184,19 +243,34 @@ void DHTManager::updateOthers()
 
 void DHTManager::updatePredecessor(QVariantMap map)
 {
-  qDebug() << "THE MAP " << map;
+  qDebug() << "UPDATE PREDECESSOR " << map;
 
   int index = map["updateIndex"].toUInt();
   index = index % sizeDHT;
   Node *nn = closestPrecedingNode(index);
-  if (nn == this->self){
+  if (nn->index == this->self->index) {
     Node *node = finger[map["updateFingerIndex"].toUInt()].node;
     if (node == NULL) {
       node = new Node(0, 0, QHostAddress());
     }
-    node->index = index;
-    node->port = map["updatePort"].toUInt();
-    node->hostAddress = QHostAddress(map["updateHostAddress"].toString());
+    int me = map["updateValue"].toUInt();
+    int low = finger[map["updateFingerIndex"].toUInt()].start;
+    int high = node->index;
+    if ((low < high && me >= low && me < high) || (low > high && (me >= low || me < high))) {
+      node->index = map["updateValue"].toUInt();
+      node->port = map["updatePort"].toUInt();
+      node->hostAddress = QHostAddress(map["updateHostAddress"].toString());
+      if (map["updateFingerIndex"].toInt() == 0) {
+        qDebug() << "Successor updated";
+        this->self->successor->index = map["updateValue"].toUInt();
+        this->self->successor->port = map["updatePort"].toUInt();
+        this->self->successor->hostAddress = QHostAddress(map["updateHostAddress"].toString());
+      }
+      fingerTableUpdated();
+    } else {
+      qDebug() << "No update necessary" << me << low << high;
+      qDebug() << "";
+    }
     return;
   }
   emit sendDHTMessage(map, nn->port, nn->hostAddress);
@@ -204,16 +278,28 @@ void DHTManager::updatePredecessor(QVariantMap map)
 
 void DHTManager::updateFingerTable(QMap<QString, QVariant> map)
 {
-  int diff = map["SuccessorResponse"].toInt() - self->index;
+  int diff = map["Index"].toInt() - self->index;
   if (diff < 0)
     diff += sizeDHT;
   diff = diff % sizeDHT;
+  if (diff == 0) {
+    qDebug() << "THE DIFF IS ZERO??" << map;
+    qDebug() << "";
+    return;
+  }
   int fingerIdx = log2(diff);
+
+  qDebug() << "FINGER INDEX" << fingerIdx << "" << diff;
+  qDebug() << "";
 
   finger[fingerIdx].node->index = map["SuccessorResponse"].toUInt();
   finger[fingerIdx].node->port = map["SuccessorPort"].toUInt();
   finger[fingerIdx].node->hostAddress = QHostAddress(map["SuccessorHostAddress"].toString());
-  fingerTableUpdated();
+  if (map["FingerEntryNum"].toInt() >= 0) {
+    initFingerTableHelper(map);
+  } else {
+    fingerTableUpdated();
+  }
 }
 
 void DHTManager::fingerTableUpdated()
