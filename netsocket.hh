@@ -92,6 +92,7 @@ class NetSocket : public QUdpSocket
     void joinDHT(Peer *peer);
     void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
     void fingerTableUpdated(QList<QPair<int, int> > table);
+    void updatePredecessorReciever(QMap<QString, QVariant> map, Peer* peer);
 
   signals:
     void messageRecieved(QVariant chatText);
@@ -109,6 +110,7 @@ class NetSocket : public QUdpSocket
     void receivedHeartbeat();
     void fingerTableUpdatedSignal(QList<QPair<int, int> > table);
     void updateFingerTableWithNewNode(int peerIndex, Peer *peer);
+    void updatePredecessorSignal(QMap<QString, QVariant> map);
 
   private:
     int myPortMin, myPortMax, myPort;

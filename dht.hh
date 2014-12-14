@@ -60,6 +60,7 @@ class DHTManager : public QObject
     void predecessorFailed();
     void fixFingers();
     void updateFingerTableWithNewNode(int peerIndex, Peer *peer);
+    void updatePredecessorReciever(QMap<QString, QVariant>);
 
   signals:
     void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
