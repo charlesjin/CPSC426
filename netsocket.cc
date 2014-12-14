@@ -904,6 +904,7 @@ void NetSocket::secretRecovered(QString recoveredSecret)
 
 void NetSocket::joinDHT(Peer *peer)
 {
+  return; 
   // Send direct message to peer asking if it has DHT
   QVariantMap map;
   map.insert("JoinDHTRequest", originID);
@@ -919,6 +920,7 @@ void NetSocket::joinDHT(Peer *peer)
 
 void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
 {
+  return;
   QString peerOriginID = map["JoinDHTRequest"].toString();
   int peerIndex = map["Index"].toInt();
 
