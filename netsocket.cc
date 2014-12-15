@@ -813,8 +813,8 @@ void NetSocket::sendSecret(QString secret)
   // the secret).
   // Let the threshold k be 75% of the total number of nodes.
   quint16 numNodes = peerManager->routingTable.size() + 1;
-  // quint16 threshold = (numNodes * 3) / 4;
-  quint16 threshold = numNodes - 1;
+  quint16 threshold = (numNodes * 3) / 4;
+  // quint16 threshold = numNodes - 1;
 
 
   qint32 secretKey = qrand() % 1298831;
