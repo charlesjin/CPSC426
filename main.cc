@@ -101,13 +101,19 @@ ChatDialog::ChatDialog()
 
   QLabel *fingerLabel = new QLabel(this);
   fingerLabel->setText("Finger Table");
+
   dHTFingerTable = new QTableWidget(this);
   dHTFingerTable->setColumnCount(2);
   dHTFingerTable->setRowCount(7);
+  dHTFingerTable->setColumnWidth(0,87);
+  dHTFingerTable->setColumnWidth(1,87);
+  dHTFingerTable->setMinimumWidth(180);
+  dHTFingerTable->setMaximumWidth(180);
   QStringList headers;
   headers << "Start" << "Node";
   dHTFingerTable->setHorizontalHeaderLabels(headers);
   dHTFingerTable->verticalHeader()->setVisible(false);
+  dHTFingerTable->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 
   QVBoxLayout *dHTLayout = new QVBoxLayout();
   dHTLayout->addWidget(fingerLabel);
@@ -241,13 +247,13 @@ void ChatDialog::clickedShareSecret()
 {
   ShareSecretDialog *shareSecretDialog = new ShareSecretDialog();
 
-  connect(shareSecretDialog, SIGNAL(enteredSecret(quint32)), 
-      this, SLOT(newSecret(quint32)));
+  connect(shareSecretDialog, SIGNAL(enteredSecret(QString)), 
+      this, SLOT(newSecret(QString)));
 
   shareSecretDialog->exec();
 }
 
-void ChatDialog::newSecret(quint32 secret)
+void ChatDialog::newSecret(QString secret)
 {
   // Share the secret stored in the variable "secret"
   emit shareSecret(secret);
@@ -259,8 +265,8 @@ void ChatDialog::clickedRecoverSecret()
 
   connect(recoverSecretDialog->secretlistview, SIGNAL(itemClicked(QListWidgetItem*)),
       this, SLOT(secretClicked(QListWidgetItem*)));
-  connect(this, SIGNAL(showReconstructedSecret(qint32)),
-      recoverSecretDialog, SLOT(showReconstructedSecret(qint32)));
+  connect(this, SIGNAL(showReconstructedSecret(QString)),
+      recoverSecretDialog, SLOT(showReconstructedSecret(QString)));
 
   recoverSecretDialog->exec();
 }
@@ -283,7 +289,7 @@ void ChatDialog::newSecretRecieved(QString secretID)
   qDebug() << secretList;
 }
 
-void ChatDialog::secretReconstructed(qint32 reconstructedSecret)
+void ChatDialog::secretReconstructed(QString reconstructedSecret)
 {
   emit showReconstructedSecret(reconstructedSecret);
 }
@@ -523,7 +529,7 @@ ShareSecretDialog::ShareSecretDialog()
 void ShareSecretDialog::gotReturnPressed()
 {
   QString secret = secretLine->text();
-  emit enteredSecret(secret.toUInt());
+  emit enteredSecret(secret);
   close();
 }
 
@@ -561,9 +567,9 @@ RecoverSecretDialog::RecoverSecretDialog(QStringList secretList)
 //      this, SLOT(closeDialog()));
 }
 
-void RecoverSecretDialog::showReconstructedSecret(qint32 reconstructedSecret)
+void RecoverSecretDialog::showReconstructedSecret(QString reconstructedSecret)
 {
-  recoveredsecretview->setText(QString::number(reconstructedSecret));
+  recoveredsecretview->setText(reconstructedSecret);
 }
 
 void RecoverSecretDialog::closeDialog()
@@ -617,14 +623,14 @@ int main(int argc, char **argv)
   QObject::connect(sock, SIGNAL(messageRecieved(QVariant)), 
       dialog, SLOT(recieveMessage(QVariant)));
 
-  QObject::connect(dialog, SIGNAL(shareSecret(quint32)),
-      sock, SLOT(sendSecret(quint32)));
+  QObject::connect(dialog, SIGNAL(shareSecret(QString)),
+      sock, SLOT(sendSecret(QString)));
   QObject::connect(sock, SIGNAL(secretRecieved(QString)),
       dialog, SLOT(newSecretRecieved(QString)));
   QObject::connect(dialog, SIGNAL(recoverSecret(QString)),
       sock, SLOT(recoverSecret(QString)));
-  QObject::connect(sock, SIGNAL(secretReconstructed(qint32)),
-      dialog, SLOT(secretReconstructed(qint32)));
+  QObject::connect(sock, SIGNAL(secretReconstructed(QString)),
+      dialog, SLOT(secretReconstructed(QString)));
   QObject::connect(sock, SIGNAL(fingerTableUpdatedSignal(QList<QPair<int, int> >)),
       dialog, SLOT(fingerTableUpdated(QList<QPair<int, int> >)));
 

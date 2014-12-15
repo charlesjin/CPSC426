@@ -84,9 +84,9 @@ class NetSocket : public QUdpSocket
     void sendRouteRumorToPeer(Peer *peer);
 
     /* secret sharing */
-    void sendSecret(quint32 secret);
+    void sendSecret(QString secret);
     void recoverSecret(QString secretID);
-    void secretRecovered(qint32 recoveredSecret);
+    void secretRecovered(QString recoveredSecret);
 
     /* DHT */
     void joinDHT(Peer *peer);
@@ -99,7 +99,7 @@ class NetSocket : public QUdpSocket
     void secretRecieved(QString secretID);
     void refreshSearchResults(QString fileName);
     void newSecretShare(QMap<QString, QVariant> map);
-    void secretReconstructed(qint32 reconstructedSecret);
+    void secretReconstructed(QString reconstructedSecret);
     void successorRequest(QVariantMap map, Peer* peer);
     void updateFingerTable(QMap<QString, QVariant> map);
     void updateIndex(QVariantMap map);

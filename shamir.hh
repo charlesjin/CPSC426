@@ -7,15 +7,18 @@
 
 class ShamirSecret : public QObject
 {
-	Q_OBJECT
+  Q_OBJECT
 
 public:
-	static QList<QPair<qint16, qint64> > generateSecrets(qint32 secret, qint16 noPlayers, quint16 threshold);
-	static qint32 solveSecret(QList<QPair<qint16, qint64> > points);
+  static QList<QPair<qint16, qint64> > generateSecrets(qint32 secret, qint16 noPlayers, quint16 threshold);
+  static QList<int> generatePoints(qint32 seed, qint16 noPlayers, int sizeDHT);
+  static QString encryptMessage(QString secret, qint32 secretKey, QByteArray init);
+  static QString decryptMessage(QByteArray encryptedMessage, qint32 secretKey, QByteArray init);
+  static qint32 solveSecret(QList<QPair<qint16, qint64> > points);
   
 private:
-	ShamirSecret();
-	~ShamirSecret();
+  ShamirSecret();
+  ~ShamirSecret();
 
 };
 
