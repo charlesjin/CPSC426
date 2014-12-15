@@ -29,7 +29,7 @@
 // initializes the chat dialog, which is the main IO
 ChatDialog::ChatDialog()
 {
-  setWindowTitle("Peerster");
+  setWindowTitle("Vanish");
 
   // side window to view peers/initiate DM
   peerview = new QListWidget(this);
