@@ -359,19 +359,20 @@ void DHTManager::fixFingers()
   next = next + 1;
   if (next > 7)
     next = 0;
+
+  qDebug() << "running fixFingers on entry " << next;
   
-  // update finger[next] = find_successor(n+2^
-  //
-  //  call
-  //  Node *DHTManager::findSuccessor(int index, Peer *peer, QString peerOriginID)
-  // if the response is null, then we're done because it will call updatefingertable
-  // otherwise, we need to manually update the finger table entry because it will return a node
-  // if node x != NULL, then finger[next].node = x
+  Peer *p = new Peer();
+  p->port = this->self->predecessor->port;
+  p->hostAddress = this->self->predecessor->hostAddress;
   
+  Node *n = this->findSuccessor(finger[next].start, p, originID);
   
-  // findSuccessor(finger[i].start, who sent the message, origin;
-  // do something like finger[i].node = find_successor(finger[i].start);
-  
+  if (n != NULL){
+    finger[next].node->index = n->index;
+    finger[next].node->port = n->port;
+    finger[next].node->hostAddress = n->hostAddress;
+  }
 }
 
 // void DHTManager::newPredecessor(QMap<QString, QVariant> map)
