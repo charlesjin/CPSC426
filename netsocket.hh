@@ -8,7 +8,7 @@
 #include "peer.hh"
 #include "peermanager.hh"
 #include "filemanager.hh"
-#include "secretmanager.hh"
+#include "secretmanager_charles.hh"
 #include "dht.hh"
 
 class NetSocket : public QUdpSocket

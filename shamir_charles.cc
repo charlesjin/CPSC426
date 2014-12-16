@@ -10,7 +10,7 @@
 
 #include <QtCore>
 
-#include "shamir.hh"
+#include "shamir_charles.hh"
 
 ShamirSecret::ShamirSecret()
 {

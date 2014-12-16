@@ -16,6 +16,8 @@ SOURCES += main.cc
 
 HEADERS += netsocket.hh
 SOURCES += netsocket.cc
+SOURCES += netsocket_kayo.cc
+SOURCES += netsocket_charles.cc
 
 HEADERS += peermanager.hh
 SOURCES += peermanager.cc
@@ -29,11 +31,12 @@ SOURCES += filemanager.cc
 HEADERS += fileconnection.hh
 SOURCES += fileconnection.cc
 
-HEADERS += shamir.hh
-SOURCES += shamir.cc
+HEADERS += shamir_charles.hh
+SOURCES += shamir_charles.cc
 
-HEADERS += secretmanager.hh
-SOURCES += secretmanager.cc
+HEADERS += secretmanager_charles.hh
+SOURCES += secretmanager_charles.cc
 
 HEADERS += dht.hh
 SOURCES += dht.cc
+SOURCES += dht_kayo.cc

@@ -4,8 +4,8 @@
 /*                           */
 /*****************************/
 
-#include "secretmanager.hh"
-#include "shamir.hh"
+#include "secretmanager_charles.hh"
+#include "shamir_charles.hh"
 #include <QDebug>
 
 SecretManager::SecretManager()
