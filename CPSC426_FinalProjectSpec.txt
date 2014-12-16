@@ -110,15 +110,14 @@ DIVISION OF WORK
     that will pull together all of the parts.
 
 * Charles:
-    Implement the secret reconstruction algorithm. That is, given several (x,
-    f(x)) pairs, using interpolation to determine the polynomial coefficients
-    and ultimately the secret.
+    Implement the secret sharing algorithm. Given an integer secret, developed
+    a function to determine the (x, f(x)) pairs (i.e.  portions of the secret)
+    to distribute to the secret holding node’s peers. Given several (x, f(x))
+    pairs, used interpolation to determine the polynomial coefficients and
+    ultimately the secret.
 
 * Daniel:
-    Implement the secret division algorithm. Given an integer secret, developing
-    a function and then determining the (x, f(x)) pairs (i.e.  portions of the
-    secret) to distribute to the secret holding node’s peers. Also implement the
-    actual GUIs.
+    Implement the GUIs and connected them to the message types.
 
 -------------------------------------------------------------------------------
 PROPOSAL Part II Vanish in Peerster (Vanishing Data Objects (VDOs) in Peerster)

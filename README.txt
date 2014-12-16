@@ -15,7 +15,7 @@ and Vanish (2009).
 HOW TO RUN THE SYSTEM: Run two or more peerster instances.
 > ./peerster
 OR
-> ./peerster <peer>
+> ./peerster <hostname:portnumber>
 
 Have the peerster nodes add each other so that they all have each other as a
 peer. (Note: this may be done from the command line (see above) or by clicking
@@ -38,8 +38,16 @@ requesting node, the encryption key can be reconstructed and the secret
 decrypted. The message will be displayed in the line following “The recovered
 secret.” If the secret cannot be reconstructed (due the number of encryption key
 shares in the network falling below the required threshold from churn), no
-message will be displayed.
+message will be displayed. Closing the dialog destroys the information until the
+secret is requested again (so that reconstructed messages are not saved).
 
+The system is currently set to have its threshold be 3/4 of the number of total
+nodes connected with everyone participating. This was done for testing purposes:
+starting up four nodes and removing one still leaves the secret reconstructable,
+but deleting a second node renders the secret undecrytable. In a more realistic
+scheme, it would be harder to see the actually "vanishing" nature of the data
+behavior correctly without multiple tests and a large number of connected nodes
+due to the randomized nature.
 
 FOR MORE INFORMATION: Please see CPSC426_FinalProjectSpec.txt (in this
 directory) or contact Kayo (kayo.teramoto@yale.edu), Charles
