@@ -24,6 +24,7 @@ ShamirSecret::~ShamirSecret()
 
 QList<QPair<qint16, qint64> > ShamirSecret::generateSecrets(qint32 secret, qint16 noPlayers, quint16 threshold)
 {
+  qDebug() << "scret is" << secret;
   QList<QPair<qint16, qint64> > response;
   if (noPlayers < threshold)
     return response;
@@ -60,6 +61,7 @@ qint32 ShamirSecret::solveSecret(QList<QPair<qint16, qint64> > points)
     }
     response += term;
   }
+  qDebug() << "secret is" << (qint32) round(response);
   return (qint32) round(response);
 }
 
@@ -75,14 +77,14 @@ QList<int> ShamirSecret::generatePoints(qint32 seed, qint16 noPlayers, int sizeD
 
 QString ShamirSecret::encryptMessage(QString secret, qint32 secretKey, QByteArray init)
 {
-  QCA::SecureArray key(secretKey);
+  QCA::SecureArray key(QString::number(secretKey).toAscii().data());
   QCA::SymmetricKey keyObject(key);
   QCA::InitializationVector iv(init);
 
   QCA::Cipher cipher(QString("aes128"),QCA::Cipher::CBC,
     QCA::Cipher::DefaultPadding,
     QCA::Encode,
-    keyObject, iv);
+    keyObject, iv); 
 
   QCA::SecureArray arg = secret.toAscii();
   QCA::SecureArray u = cipher.update(arg);
@@ -94,8 +96,7 @@ QString ShamirSecret::encryptMessage(QString secret, qint32 secretKey, QByteArra
 
 QString ShamirSecret::decryptMessage(QByteArray encryptedMessage, qint32 secretKey, QByteArray init)
 {
-
-  QCA::SecureArray key(secretKey);
+  QCA::SecureArray key(QString::number(secretKey).toAscii().data());
   QCA::SymmetricKey keyObject(key);
   QCA::InitializationVector iv(init);
 
@@ -105,7 +106,7 @@ QString ShamirSecret::decryptMessage(QByteArray encryptedMessage, qint32 secretK
     keyObject, iv);
 
   QCA::SecureArray plainText = cipher.update(encryptedMessage);
-  plainText = cipher.final();
+  plainText += cipher.final();
 
   return plainText.data();
 }
