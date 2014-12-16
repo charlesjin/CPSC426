@@ -93,14 +93,23 @@ ChatDialog::ChatDialog()
   secretLayout->addWidget(shareSecretButton);
   secretLayout->addWidget(recoverSecretButton);
 
+  // finger table
+  QPushButton *showFingerTableButton = new QPushButton("Show Finger Table", this);
+  QHBoxLayout *fingerLayout = new QHBoxLayout();
+  fingerLayout->addWidget(showFingerTableButton);
+  connect(showFingerTableButton, SIGNAL(clicked()),
+      this, SLOT(clickedShowFingerTable()));
+
   QVBoxLayout *chatLayout = new QVBoxLayout();
   chatLayout->addWidget(textview);
   chatLayout->addWidget(textedit);
   chatLayout->addLayout(fileLayout);
   chatLayout->addLayout(secretLayout);
+  chatLayout->addLayout(fingerLayout);
 
   QLabel *fingerLabel = new QLabel(this);
   fingerLabel->setText("Finger Table");
+  fingerLabel->setVisible(false);
 
   dHTFingerTable = new QTableWidget(this);
   dHTFingerTable->setColumnCount(2);
@@ -114,6 +123,7 @@ ChatDialog::ChatDialog()
   dHTFingerTable->setHorizontalHeaderLabels(headers);
   dHTFingerTable->verticalHeader()->setVisible(false);
   dHTFingerTable->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+  dHTFingerTable->setVisible(false);
 
   QVBoxLayout *dHTLayout = new QVBoxLayout();
   dHTLayout->addWidget(fingerLabel);
@@ -241,6 +251,17 @@ void ChatDialog::searchItemClicked(QListWidgetItem* item)
   QMap<QString, QVariant> map;
   map.insert("fileName", item->text());
   emit newFileRequestFromSearch(map);
+}
+
+void ChatDialog::clickedShowFingerTable()
+{
+  if (dHTFingerTable->isVisible()){
+    dHTFingerTable->hide();
+    // ((QHBoxLayout *)dHTFingerTable->parent())->itemAt(0)->widget()->hide();
+  } else {
+    dHTFingerTable->show();
+    // ((QHBoxLayout *)dHTFingerTable->parent())->itemAt(0)->widget()->show();
+  }
 }
 
 void ChatDialog::clickedShareSecret()

@@ -42,6 +42,7 @@ class ChatDialog : public QDialog
     void secretClicked(QListWidgetItem* secret);
     void secretReconstructed(QString reconstructedSecret);
     void fingerTableUpdated(QList<QPair<int, int> > table);
+    void clickedShowFingerTable();
 
   signals:
     void sendMessage(QMap<QString, QVariant> map);
