@@ -41,6 +41,7 @@ class DHTManager : public QObject
     DHTManager(QString originID, quint16 port, QHostAddress hostAddress);
     bool isInDHT();
     void initializeDHT(int peerIndex, quint16 port, QHostAddress hostAddress);
+    void initTimers();
     void join(Peer* peer, QMap<QString, QVariant> map);
     int getIndex();
 
@@ -53,6 +54,7 @@ class DHTManager : public QObject
     void newPredecessor(QMap<QString, QVariant> map);
     void stabilizeBegin();
     void stabilize(QMap<QString, QVariant> map);
+    void stabilizeFailed();
     void notify(QMap<QString, QVariant> map);
     void sendCurrentPredecessor(Peer* peer);
     void checkPredecessor();
@@ -68,15 +70,17 @@ class DHTManager : public QObject
 
   private:
     int sizeDHT;
+    int next; // determines which finger table entry to refresh next
     Node *self;
     QString originID;
-    int next; // determines which finger table entry to refresh next
     QTimer *stabilizeTimer;
+    QTimer *stabilizeFailureTimer;
     QTimer *checkPredecessorTimer;
     QTimer *failureTimer;
     QTimer *fixFingersTimer;    
 
     QList<FingerEntry> finger;
+    QHash<int, Node*> *successorList;
     Node* closestPrecedingNode(int index);
     void askForSuccessor(Node* nn, int index, Peer* peer, QString peerOriginID, int fingerEntryNum);
     void initFingerTable(QMap<QString, QVariant> map, Peer* peer);
@@ -86,6 +90,9 @@ class DHTManager : public QObject
     bool betweenInterval(int begin, int end, int x);
     void fingerTableUpdated();
     bool inRange(int i, int start, int end);
+    void initSuccessorList();
+    void updateSuccessorList(QVariantMap map);
+    void updateSuccessorListFT(QVariantMap map);
 };
 
 #endif // PEERSTER_DHT_HH

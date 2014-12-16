@@ -16,7 +16,9 @@ DHTManager::DHTManager(QString originID, quint16 port, QHostAddress hostAddress)
   this->originID = originID;
   sizeDHT = 128;
   
-  next = 0;
+  initTimers();
+  
+//  next = 0;
 
 //  stabilizeTimer = new QTimer(this);
 //  connect(stabilizeTimer, SIGNAL(timeout()), 
@@ -423,18 +425,18 @@ void DHTManager::newPredecessor(QMap<QString, QVariant> map)
 //  node->hostAddress = QHostAddress(map["updateHostAddress"].toString());
 }
 
-bool DHTManager::betweenInterval(int begin, int end, int x)
-{
+// bool DHTManager::betweenInterval(int begin, int end, int x)
+// {
 //  if (begin < end)
 //    return (x > begin && x < end);
 //  else if (begin > end)
 //    return (x > begin || x < end);
 //  else
 //    return false;
-}
+// }
 
-void DHTManager::stabilizeBegin() 
-{
+// void DHTManager::stabilizeBegin() 
+// {
 //  if (!isInDHT()) return;
 //  
 //  // ask for successor's predecessor
@@ -442,7 +444,7 @@ void DHTManager::stabilizeBegin()
 //  map.insert("StoredPredecessorRequest", this->self->index);
 //  
 //  emit sendDHTMessage(map, this->self->successor->port, this->self->successor->hostAddress);
-}
+// }
 
 void DHTManager::updateFingerTableWithNewNode(int peerIndex, Peer *peer)
 {
@@ -473,8 +475,8 @@ void DHTManager::updateFingerTableWithNewNode(int peerIndex, Peer *peer)
 //   emit fingerTableUpdatedSignal(table);
 // }
 
-void DHTManager::notify(QMap<QString, QVariant>map)
-{
+// void DHTManager::notify(QMap<QString, QVariant>map)
+// {
 //  int idx = map["Notify"].toUInt();
 //
 //  if (this->self->predecessor->hostAddress.isNull() || 
@@ -484,20 +486,20 @@ void DHTManager::notify(QMap<QString, QVariant>map)
 //    this->self->predecessor->port = map["SenderPort"].toUInt();
 //    this->self->predecessor->hostAddress = QHostAddress(map["SenderHostAddress"].toString());
 //  }
-}
+// }
 
-void DHTManager::sendCurrentPredecessor(Peer *peer) 
-{
+// void DHTManager::sendCurrentPredecessor(Peer *peer) 
+// {
 //  QMap<QString, QVariant> map;
 //  map.insert("StoredPredecessorResponse", this->self->predecessor->index);
 //  map.insert("StoredPredecessorPort", this->self->predecessor->port);
 //  map.insert("StoredPredecessorHostAddress", this->self->predecessor->hostAddress.toString());
 //
 //  emit sendDHTMessage(map, peer->port, peer->hostAddress);
-}
+// }
 
-void DHTManager::checkPredecessor() 
-{
+// void DHTManager::checkPredecessor() 
+// {
 //  if (!isInDHT()) return;
 //  
 //  QMap<QString, QVariant> map;
@@ -506,22 +508,22 @@ void DHTManager::checkPredecessor()
 //
 //  qDebug() << this->self->port << " sent heartbeat request to " << this->self->predecessor->port;
 //  failureTimer->start(3000);
-}
+// }
 
-void DHTManager::receivedHeartbeat() 
-{
+// void DHTManager::receivedHeartbeat() 
+// {
 //  qDebug() << "received heartbeat";
 //  failureTimer->stop();
-}
+// }
 
-void DHTManager::predecessorFailed() 
-{
+// void DHTManager::predecessorFailed() 
+// {
 //  this->self->predecessor->hostAddress = QHostAddress();
 //  qDebug() << "predecessor has failed";
-}
+// }
 
-void DHTManager::fixFingers()
-{ 
+// void DHTManager::fixFingers()
+// { 
 //  if (!isInDHT()) return;
 //  
 //  next = next + 1;
@@ -540,7 +542,7 @@ void DHTManager::fixFingers()
 //  // findSuccessor(finger[i].start, who sent the message, origin;
 //  // do something like finger[i].node = find_successor(finger[i].start);
 //  
-}
+// }
 
 // void DHTManager::newPredecessor(QMap<QString, QVariant> map)
 // {
@@ -572,8 +574,8 @@ bool DHTManager::inRange(int i, int start, int end)
 //  emit sendDHTMessage(map, this->self->successor->port, this->self->successor->hostAddress);
 //}
 //
-void DHTManager::stabilize(QMap<QString, QVariant> map)
-{
+// void DHTManager::stabilize(QMap<QString, QVariant> map)
+// {
 //   int idx = map["StoredPredecessorResponse"].toInt();
 //
 //  if (!map["StoredPredecessorHostAddress"].isNull() 
@@ -588,7 +590,7 @@ void DHTManager::stabilize(QMap<QString, QVariant> map)
 //   map.insert("SenderPort", this->self->port);
 //   map.insert("SenderHostAddress", this->self->hostAddress.toString());
 //   emit sendDHTMessage(map, this->self->successor->port, this->self->successor->hostAddress);
-}
+// }
 //
 //void DHTManager::notify (QMap<QString, QVariant> map) 
 //{

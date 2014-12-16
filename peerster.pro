@@ -18,6 +18,7 @@ HEADERS += netsocket.hh
 SOURCES += netsocket.cc
 SOURCES += netsocket_kayo.cc
 SOURCES += netsocket_charles.cc
+SOURCES += netsocket_daniel.cc
 
 HEADERS += peermanager.hh
 SOURCES += peermanager.cc
@@ -40,3 +41,4 @@ SOURCES += secretmanager_charles.cc
 HEADERS += dht.hh
 SOURCES += dht.cc
 SOURCES += dht_kayo.cc
+SOURCES += dht_daniel.cc

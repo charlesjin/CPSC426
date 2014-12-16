@@ -93,6 +93,7 @@ class NetSocket : public QUdpSocket
     void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
     void fingerTableUpdated(QList<QPair<int, int> > table);
     void updatePredecessorReciever(QMap<QString, QVariant> map, Peer* peer);
+    void stabilizeInitializer(DHTManager* dHTManager);
 
   signals:
     void messageRecieved(QVariant chatText);

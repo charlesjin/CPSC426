@@ -43,6 +43,7 @@ class ChatDialog : public QDialog
     void secretReconstructed(QString reconstructedSecret);
     void fingerTableUpdated(QList<QPair<int, int> > table);
     void clickedShowFingerTable();
+    void fingerTableEdit();
 
   signals:
     void sendMessage(QMap<QString, QVariant> map);
@@ -63,6 +64,8 @@ class ChatDialog : public QDialog
     QPushButton *button;
     QStringList *secretList;
     QTableWidget *dHTFingerTable;
+    QList<QPair<int, int> > *fTTable;
+    QTimer *fingerTableTimer;
 };
 
 class TextEdit : public QTextEdit

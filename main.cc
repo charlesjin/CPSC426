@@ -16,6 +16,7 @@
 #include <QtCrypto>
 #include <QKeyEvent>
 #include <QHeaderView>
+#include <QTimer>
 
 #include "main.hh"
 #include "netsocket.hh"
@@ -107,6 +108,13 @@ ChatDialog::ChatDialog()
   chatLayout->addLayout(secretLayout);
   chatLayout->addLayout(fingerLayout);
 
+  fingerTableTimer = new QTimer(this);
+  fingerTableTimer->setSingleShot(true);
+  connect(fingerTableTimer, SIGNAL(timeout()),
+    this, SLOT(fingerTableEdit()));
+  
+  fTTable = new QList<QPair<int, int> >();
+    
   QLabel *fingerLabel = new QLabel(this);
   fingerLabel->setText("Finger Table");
   fingerLabel->setVisible(false);
@@ -317,6 +325,29 @@ void ChatDialog::secretReconstructed(QString reconstructedSecret)
 
 void ChatDialog::fingerTableUpdated(QList<QPair<int, int> >table)
 {
+
+  fTTable->clear();
+  for (int i = 0; i < table.size(); i++) {
+    fTTable->append(QPair<int, int>(table[i].first, table[i].second));
+  }
+
+  if (!fingerTableTimer->isActive()) {
+    fingerTableTimer->start(500);
+    return;
+  }
+  
+/*  for (int i = 0; i < table.size(); i++) {
+    QTableWidgetItem *item1 = new QTableWidgetItem(QString::number(table[i].first));
+    QTableWidgetItem *item2 = new QTableWidgetItem(QString::number(table[i].second));
+    dHTFingerTable->setItem(i, 0, item1);
+    dHTFingerTable->setItem(i, 1, item2);
+  }*/
+}
+
+void ChatDialog::fingerTableEdit() 
+{
+  QList<QPair<int, int> > table = *fTTable;
+
   for (int i = 0; i < table.size(); i++) {
     QTableWidgetItem *item1 = new QTableWidgetItem(QString::number(table[i].first));
     QTableWidgetItem *item2 = new QTableWidgetItem(QString::number(table[i].second));

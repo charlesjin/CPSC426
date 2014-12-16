@@ -90,14 +90,15 @@ bool NetSocket::initialize()
           dHTManager, SLOT(updatePredecessor(QVariantMap)));
       connect(this, SIGNAL(newPredecessor(QMap<QString, QVariant>)),
           dHTManager, SLOT(newPredecessor(QMap<QString, QVariant>)));
-      connect(this, SIGNAL(sendCurrentPredecessor(Peer*)),
-          dHTManager, SLOT(sendCurrentPredecessor(Peer*)));
-      connect(this, SIGNAL(stabilize(QMap<QString, QVariant>)),
-          dHTManager, SLOT(stabilize(QMap<QString, QVariant>)));
-      connect(this, SIGNAL(notify(QMap<QString, QVariant>)),
-          dHTManager, SLOT(notify(QMap<QString, QVariant>)));
-      connect(this, SIGNAL(receivedHeartbeat()),
-          dHTManager, SLOT(receivedHeartbeat()));
+//      connect(this, SIGNAL(sendCurrentPredecessor(Peer*)),
+//          dHTManager, SLOT(sendCurrentPredecessor(Peer*)));
+//      connect(this, SIGNAL(stabilize(QMap<QString, QVariant>)),
+//          dHTManager, SLOT(stabilize(QMap<QString, QVariant>)));
+//      connect(this, SIGNAL(notify(QMap<QString, QVariant>)),
+//          dHTManager, SLOT(notify(QMap<QString, QVariant>)));
+//      connect(this, SIGNAL(receivedHeartbeat()),
+//          dHTManager, SLOT(receivedHeartbeat()));
+      stabilizeInitializer(dHTManager);
       connect(dHTManager, SIGNAL(fingerTableUpdatedSignal(QList<QPair<int, int> >)),
           this, SLOT(fingerTableUpdated(QList<QPair<int, int> >)));
       connect(this, SIGNAL(updateFingerTableWithNewNode(int, Peer*)),
@@ -1022,7 +1023,7 @@ void NetSocket::resendRumor()
 //   emit sendCurrentPredecessor(peer);
 // }
 
-void NetSocket::storedPredecessorResponseReciever (QMap<QString, QVariant> map)
+/*void NetSocket::storedPredecessorResponseReciever (QMap<QString, QVariant> map)
 {
   emit stabilize(map);
 }
@@ -1042,7 +1043,7 @@ void NetSocket::heartbeatRequestReciever(Peer* peer)
 void NetSocket::heartbeatReplyReciever() 
 {
   emit receivedHeartbeat();
-}
+}*/
 
 // void NetSocket::fingerTableUpdated(QList<QPair<int, int> > table) {
 //   emit fingerTableUpdatedSignal(table);
