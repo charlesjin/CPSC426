@@ -1,0 +1,254 @@
+CPSC 426: Building Decentralized Systems Final Project Specifications Final
+Group Version Fall 2014
+
+Group: Kayo Teramoto, Charles Jin, Daniel Chiu
+
+Last Updated: 12/15/2014
+-------------------------------------------------------------------------------
+PROPOSAL Part I Secret Sharing in Peerster
+
+
+GOAL To implement secret sharing in our peerster application using Shamir's
+Secret Sharing Algorithm.
+
+
+BACKGROUND For sensitive data, security is vital. That is, sensitive data should
+be considered a secret, which by definition cannot be public knowledge.
+Encryption can help protect data, but traditional encryption methods require an
+individual to hold the key to decrypting the data. This makes the key- holder a
+target for hackers hoping to steal this data and makes the system ultimately
+insecure and unreliable--if the key-holder were to be compromised or to go down,
+the data would be stolen in the former case or unavailable in the latter.
+
+Secret sharing is a method that employs a decentralized system to protect a
+secret in a secure and reliable fashion. The data--i.e. the secret--is divided
+into numerous portions and distributed to members of a group or network. There
+is good security since each individual portion alone is not enough to
+reconstruct the secret; there is no single-point vulnerability.  This also
+implies that the secret generator does not necessarily need to trust the peers
+to whom he allocates a portion of his secret. Likewise, reliability is fairly
+high in secret sharing implementations that do not require all portions of the
+divided secret to reconstruct the secret.  Some number of secret shareholding
+nodes may go down without compromising the availability of the secret.
+
+Such a secret sharing scheme was developed by Shamir (1979) [Shamir, 'How to
+Share a Secret']. The secret sharing system we build in this project will be
+based on Shamir's algorithm.
+
+
+SHAMIR'S SECRET SHARING ALGORITHM Shamir's algorithm is a (k, n) threshold
+scheme, where two properties are always maintained: 1. The data--i.e. secret--is
+easily computable given k or more pieces.  2. Fewer than k pieces makes the data
+computationally difficult to reconstruct.  Note that n is the number of peers or
+participants of secret sharing. In the case of k=n, all participants are needed
+for secret reconstruction.  This makes the system unreliable since the failure
+  of any single participant--i.e. peerster node--makes it impossible to
+  reconstruct the secret. We thus ideally want k < n.
+
+The data is divided into n parts and distributed to n peers. The peers are each
+given a point (x, f(x)) of some polynomial determined by the original data
+holder.
+
+To reconstruct the secret from the k or more parts, polynomial interpolation is
+employed to determine the coefficients of the polynomial. With at least k
+points, a polynomial of k-1 degree can be constructed. The secret is the
+constant in the polynomial.
+
+
+KEY COMPONENTS
+* Secret Generator
+    The node who holds the original secret and distributes portions of the
+    secret among its peers.  This node will need to develop a polynomial
+    equation given a secret, remember the degree of the polynomial (i.e.
+    threshold), and determine the (x, f(x)) pairs to distribute to its peers.
+
+* Secret Sharers
+    Nodes who hold some portion of the secret, allocated to them by the secret
+    generator. The Secret Generator is also a Secret Sharer since he will send
+    himself a share of the secret.
+
+* New Message Type -- Secret Share
+    A portion of the secret sent by the secret generator to its peers.
+    Contains:
+      - Secret Share, an integer pair (x, f(x)).
+      - Secret No., the number of the secret (i.e. similar to the SeqNo of rumor
+        messages).
+      - Origin ID, ID of the secret generator.
+      - Dest, the ID of the node to whom the secret share is sent (Note that
+        shares are sent as a direct message to other nodes in the network).
+      - Threshold, the number of shares that must be returned to reconstruct the
+        secret.
+
+* New Message Type -- Secret Request
+    Request sent by the secret generator to its peers.  Contains:
+      - Secret Request, the secretID (i.e. originID with the secretNo).
+      - Origin ID, ID of the secret requester The secret requester must be the
+        same node as the secret generator.
+
+* New Message Type -- Secret Response
+    Response sent by a secret sharer after receiving a secret request message.
+    Contains:
+      - Secret Reply, the secretID (i.e. originID with the secretNo).
+      - x, the x component of the secret share
+      - fx, the f(x) component of the secret share
+      - Dest, the ID of the node to whom the secret reply is sent (Note that
+        shares are sent as a direct message to other nodes in the network).
+
+
+* New GUI -- Secret Input
+    A user can input a secret. Any node can be a secret generator.  The secret
+    will initially be limited to an integer.
+
+* New GUI -- Secret Reconstruction
+    A user can request the reconstruction of a previously submitted secret.
+
+
+DIVISION OF WORK
+* Kayo:
+    Design and implement the new message types and the functions required to
+    share a secret and request reconstruction of the secret. Write the framework
+    that will pull together all of the parts.
+
+* Charles:
+    Implement the secret reconstruction algorithm. That is, given several (x,
+    f(x)) pairs, using interpolation to determine the polynomial coefficients
+    and ultimately the secret.
+
+* Daniel:
+    Implement the secret division algorithm. Given an integer secret, developing
+    a function and then determining the (x, f(x)) pairs (i.e.  portions of the
+    secret) to distribute to the secret holding node’s peers. Also implement the
+    actual GUIs.
+
+-------------------------------------------------------------------------------
+PROPOSAL Part II Vanish in Peerster (Vanishing Data Objects (VDOs) in Peerster)
+
+
+GOAL To implement Vanish in peerster--a decentralized system with vanishing data
+objects that builds off of Shamir's Secret Sharing Algorithm. The secret message
+is encrypted and distributed to all peers in the network. The encryption key is
+now the information that is divided up and distributed across the network. To
+decrypt the key, nodes must now reconstruct the encryption key.
+
+
+BACKGROUND Data security is especially important in systems today. The Internet
+has made information exchange easier, and data destruction harder. The moment a
+user uploads a file or photo to the web or shares it with a few friends, he
+essentially loses control over that file or photo. That is, he may remove it
+from his own file directory on his computer, but may not remove it from that of
+his friends or other users on the web. This, for many, is a problem.
+
+The Geambasu, et. al. (2009) paper [Geambasu, Kohno, Levy, Levy, 'Vanish:
+Increasing Data Privacy with Self-Destructing Data'] provided a solution to the
+issue of persistent data. In part II of the final project, we implement their
+solution: a decentralized system employing distributed hash tables (DHTs), where
+the data is divided and shared across random nodes in the DHT. The local copy of
+the data is destroyed. Vanish champions the idea of a vanishing data object
+(VDO). The data is distributed and will eventually vanish when enough of the
+nodes disappear due to churh so that the data cannot be reconstructed (i.e. when
+the number of shares left falls below the threshold k of Shamir's Secret Sharing
+Algorithm).
+
+
+KEY COMPONENTS
+* DHT (Distributed Hash Table) -- We will implement a DHT with the Chord
+    algorithm (see. Stoica, et. al. (2001) paper [Stoica, Morris, Karger,
+    Kaashoek, Balakrishnan, ‘Chord: A Scalable Peer-to-peer Lookup Service for
+    Internet Applications’].
+    - This will yield various new messages, such as a JoinDHTRequest message,
+      SuccessorRequest message, UpdatePredecessor message, and SuccessorResponse
+      message.
+
+* New Message Fields to the Secret Messages -- Seed, used to determine DHT
+    location, and Message, which is the encrypted message.
+
+* New GUI -- Finger Table
+    A table to view the values in the finger table. Possibly with a button since
+    we likely will not want to see the finger table all of the time.
+
+DIVISION OF WORK
+* Kayo:
+    Implement DHT join and any functions related to a node’s entrance to the
+    system.
+
+* Charles:
+    Handle the transformation of Secret Sharing system in Part I to Vanish (i.e.
+    encrypting the message and updating the messages so that the encryption key
+    is distributed) as well as other integration work needed with regards to the
+    DHT to yield Vanish.
+
+* Daniel:
+    Implement DHT remove and any functions related to a node’s death.
+
+-------------------------------------------------------------------------------
+PROPOSAL Part III As described on the course website, Part III was the merging
+of all previous parts and testing to ensure the system works as described in the
+proposal. The two-minute video was also made during this part. The video
+transcript is included below.
+
+Please see the README.txt for instructions on how to run our final project.
+
+
+VIDEO TRANSCRIPT [All] Hi, this is Kayo Teramoto, Charles Jin, and Daniel Chiu.
+
+[Kayo] We implemented a distributed hash table and a vanishing secret sharing
+system on top of our existing peerster.
+
+[Charles] That is, a user may send an encrypted message to other users in the
+network.
+
+[Daniel] The encryption key is divided up and distributed across the network.
+
+[Kayo] To decrypt a message, a user must ask his peers for their key share.
+
+[Charles] If the number of key shares in the network falls below some
+predetermined threshold due to churn, the encryption key can no longer be
+reconstructed.
+
+[Daniel] Hence, the concept of a vanishing secret, which in theory provides
+greater data privacy for the user.
+
+[Kayo] Our system implements Shamir’s Secret Sharing algorithm published in 1979
+and is based on Chord published in 2001 and the Vanish paper published in 2009.
+
+[Charles] Here’s a demo.
+
+Demo: [Kayo] Here, we instantiate four nodes or users.
+
+[Daniel] If we click here, we can see that the finger table was constructed.
+
+[Charles] <Show finger table for all four nodes>.
+
+[Kayo] Let’s have a couple of them send secrets.
+
+[Charles] <Enter some secrets>. 
+
+[Daniel] Now, let’s ask to see a secret.
+
+[Charles] <Show secret>.
+
+[Kayo] Note that any user can request the secret.
+
+[Charles] <Show a different user requesting secret>.
+
+[Daniel] Let’s close a node.
+
+[Kayo] The threshold is currently set at 3 for a network with 4 nodes so we can
+still reconstruct the secret. 
+
+[Charles] <Show secret>.  
+
+[Daniel] Now let’s close another node.
+
+[Charles] <Attempt to show secret>.
+
+[Kayo] The number of key shares has fallen below the threshold, so the secret
+can no longer be reconstructed. It has vanished!
+
+[Daniel] In our implementation, everyone got the secret. This idea of a
+vanishing secret however could also be applied for direct messages so that only
+certain individuals can reconstruct the secret.
+
+FIN
+
+
