@@ -49,6 +49,11 @@ scheme, it would be harder to see the actually "vanishing" nature of the data
 behavior correctly without multiple tests and a large number of connected nodes
 due to the randomized nature.
 
+Disclaimer: Secrets must be entered before nodes are terminatd. The threhold
+is established based on the peerster routing table size, which unfortunately
+does not automatically update when nodes die. The DHT however will update
+and this update can be seen in the finger table.
+
 FOR MORE INFORMATION: Please see CPSC426_FinalProjectSpec.txt (in this
 directory) or contact Kayo (kayo.teramoto@yale.edu), Charles
 (charles.jin@yale.edu), or Daniel (daniel.chiu@yale.edu).
