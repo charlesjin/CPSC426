@@ -226,36 +226,6 @@ void DHTManager::stabilize(QMap<QString, QVariant> map)
      this->self->successor->hostAddress);
 }
 
-//
-//void DHTManager::notify (QMap<QString, QVariant> map) 
-//{
-//  int idx = map["Notify"].toUInt();
-//
-//  if (this->self->predecessor == NULL) {
-//
-//    Node *node = new Node(idx, map["NotifyPort"].toUInt(), 
-//      QHostAddress(map["NotifyHostAddress"].toString()));
-//  } 
-//
-//  else if (idx > this->self->predecessor->index && idx < this->self->index) {
-//
-//    this->self->predecessor->index = idx;
-//    this->self->predecessor->port = map["SenderPort"].toUInt();
-//    this->self->predecessor->hostAddress = QHostAddress(map["SenderHostAddress"].toString());
-//  }
-//}
-//
-//void DHTManage::sendCurrentPredecessor(Peer *peer) 
-//{
-//  QMap<QString, QVariant> map;
-//  map.insert("StoredPredecessorResponse", this->self->predecessor->index);
-//  map.insert("StoredPredecessorPort", this->self->predecessor->port);
-//  map.insert("StoredPredecessorHostAddress", this->self->predecessor->hostAddress.toString())
-//
-//  emit sendDHTMessage(map, peer->port, peer->hostAddress.toString())
-//}
-//
-
 void DHTManager::initSuccessorList() 
 {
   Node *e = new Node(this->self->successor->index, 

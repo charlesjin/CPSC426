@@ -43,7 +43,6 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
     newMap.insert("RequestPort", peer->port);
     newMap.insert("RequestHostAddress", peer->hostAddress.toString());
     newMap.insert("FingerEntryNum", 0);
-    emit updateFingerTableWithNewNode(peerIndex, peer);
     emit successorRequest(newMap, peer);
     return;
   }
@@ -53,8 +52,6 @@ void NetSocket::joinDHTReciever(QMap<QString, QVariant> map, Peer *peer)
   if (originID > peerOriginID) {
     // Initialize the DHT
     dHTManager->initializeDHT(peerIndex, peer->port, peer->hostAddress);
-    // dHTManager->initializeDHT();
-    emit updateFingerTableWithNewNode(peerIndex, peer);
 
     // Send back the successor of peerIndex + 1 and the predecessor of that
     // successor
@@ -77,8 +74,6 @@ void NetSocket::sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostA
   qDebug() << "Sending DHT Message" << map;
   qDebug() << "To" << port << hostAddress;
   qDebug() << "";
-  // if (port == myPort && hostAddress == myHostAddress && !map.contains("SuccessorResponse"))
-  //   return;
 
   QByteArray message;
   QDataStream * stream = new QDataStream(&message, QIODevice::WriteOnly);
@@ -95,7 +90,7 @@ void NetSocket::successorRequestReciever(QMap<QString, QVariant> map, Peer* peer
   emit successorRequest(map, peer);
 }
 
-void NetSocket::updatePredecessorReciever(QMap<QString, QVariant> map, Peer* peer)
+void NetSocket::updatePredecessorReciever(QMap<QString, QVariant> map)
 {
   emit updatePredecessorSignal(map);
 }
@@ -104,19 +99,11 @@ void NetSocket::successorResponseReciever(QMap<QString, QVariant> map, Peer* pee
 {
   qDebug() << "SResp Received " << map;
   qDebug() << "";
-  //if (map["Dest"].toString() == originID) {
-    if (!dHTManager->isInDHT())
-      dHTManager->join(peer, map);
-    else
-      emit updateFingerTable(map);
-  //} else
-  //  qDebug() << "=====ya fucked up=======" << map["Dest"].toString() << originID;
+  if (!dHTManager->isInDHT())
+    dHTManager->join(peer, map);
+  else
+    emit updateFingerTable(map);
 }
-
-//void NetSocket::newPredecessorReciever(QMap<QString, QVariant> map)
-//{
-//  emit newPredecessor(map);
-//}
 
 void NetSocket::updateIndexReciever(QVariantMap map)
 {
@@ -129,7 +116,7 @@ void NetSocket::storedPredecessorRequestReciever(Peer* peer)
   emit sendCurrentPredecessor(peer);
 }
 
-
 void NetSocket::fingerTableUpdated(QList<QPair<int, int> > table) {
   emit fingerTableUpdatedSignal(table);
 }
+

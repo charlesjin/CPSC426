@@ -85,10 +85,6 @@ void NetSocket::sendSecret(QString secret)
   qint32 seed = qrand() % 1024;
 
   QString secretMessage = ShamirSecret::encryptMessage(secret, secretKey, QByteArray(QString::number(seed).toAscii().data()));
-  
-  // QList<int> list = ShamirSecret::generatePoints(seed, numNodes, dHTManager->getSize());
-  // QList<QPair<qint16, QHostAddress> >routes;
-  // routes = dHTManager->getRoutes(list);
 
   // Build the message skeleton.
   QMap<QString, QVariant> secretMsg;
@@ -142,10 +138,6 @@ void NetSocket::recoverSecret(QString secretID)
 
     QHash<QString, QPair<QHostAddress, quint16> >::iterator i;
     QHash<QString, QPair<QHostAddress, quint16> >routingTable = peerManager->routingTable;
-
-    // QList<int> list = ShamirSecret::generatePoints(seed, numNodes, dHTManager->getSize());
-    // QList<QPair<qint16, QHostAddress> >routes;
-    // routes = dHTManager->getRoutes(list);
 
     for (i = routingTable.begin(); i != routingTable.end(); i++){
       recoverMsg.insert("Dest", i.key());

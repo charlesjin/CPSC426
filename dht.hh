@@ -51,7 +51,6 @@ class DHTManager : public QObject
     void successorRequest(QVariantMap map, Peer* peer);
     void updateFingerTable(QMap<QString, QVariant> map);
     void updatePredecessor(QVariantMap map);
-    void newPredecessor(QMap<QString, QVariant> map);
     void stabilizeBegin();
     void stabilize(QMap<QString, QVariant> map);
     void stabilizeFailed();
@@ -61,7 +60,6 @@ class DHTManager : public QObject
     void receivedHeartbeat();
     void predecessorFailed();
     void fixFingers();
-    void updateFingerTableWithNewNode(int peerIndex, Peer *peer);
     void updatePredecessorReciever(QMap<QString, QVariant>);
 
   signals:

@@ -110,3 +110,4 @@ QString ShamirSecret::decryptMessage(QByteArray encryptedMessage, qint32 secretK
 
   return plainText.data();
 }
+

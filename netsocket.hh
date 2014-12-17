@@ -92,7 +92,7 @@ class NetSocket : public QUdpSocket
     void joinDHT(Peer *peer);
     void sendDHTMessage(QVariantMap map, quint16 port, QHostAddress hostAddress);
     void fingerTableUpdated(QList<QPair<int, int> > table);
-    void updatePredecessorReciever(QMap<QString, QVariant> map, Peer* peer);
+    void updatePredecessorReciever(QMap<QString, QVariant> map);
     void stabilizeInitializer(DHTManager* dHTManager);
 
   signals:
@@ -104,13 +104,11 @@ class NetSocket : public QUdpSocket
     void successorRequest(QVariantMap map, Peer* peer);
     void updateFingerTable(QMap<QString, QVariant> map);
     void updateIndex(QVariantMap map);
-    void newPredecessor(QMap<QString, QVariant> map);
     void sendCurrentPredecessor(Peer* peer);
     void stabilize(QMap<QString, QVariant> map);
     void notify(QMap<QString, QVariant> map);
     void receivedHeartbeat();
     void fingerTableUpdatedSignal(QList<QPair<int, int> > table);
-    void updateFingerTableWithNewNode(int peerIndex, Peer *peer);
     void updatePredecessorSignal(QMap<QString, QVariant> map);
 
   private:
