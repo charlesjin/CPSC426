@@ -303,22 +303,21 @@ the following fields in addition to the usual direct message fields:
 PART II DHT
 
 For our implementation of Chord, we adopted the following standards:
-* if you recieve a request to join the DHT but you have no yet initialized
+* if you receive a request to join the DHT but you have not yet initialized
   your DHT, you compare your DHT's index with the requester's index. If 
   your originID is larger, you initialize the DHT and respond accordingly.
   Otherwise, you send a JoinDHTRequest in response and wait for them to
   initialize the DHT.
 * requests to find successors, predecessors, or generally send messages are
   forwarded from node to node, as opposed to each step responding directly to
-  the original requester/sender who incrementally gets closer to the correct
-  node in the DHT. In other words, if node 1 is looking for the successor to
-  index 10, and asks node 2, node 2 will not respond to node 1 telling node 1
-  to look at node 3, but forward the request to node 3, continuing the process
-  until some node has the answer. The final node then messages node 1 back
-  with the information directly. Thus every message contains the originator's
-  host and port information, in addition to auxilliary fields that will help
-  the originator determine how to use the information returned to it.
-* mark nodes as failed by setting theit host address field to QHostAddress()
+  the original requester/sender. In other words, if node 1 is looking for the
+  successor to index 10, and asks node 2, node 2 will not respond to node 1
+  telling node 1 to look at node 3, but forward the request to node 3,
+  continuing the process until some node has the answer. The final node then
+  messages node 1 back with the information directly. Thus every message
+  contains the originator's host and port information, in addition to auxiliary
+  fields that will help the originator determine how to use the information
+  returned to it.
 
 Message Types
 * a JoinDHTRequest QVariantMap for requesting to join the existing DHT
@@ -327,12 +326,12 @@ Message Types
   * an int "Index" which is your index in the DHT
 * a SuccessorRequest QVariantMap for finding the successor of a given index in
   the DHT containing the following fields:
-  * a int "SuccessorRequest" which is the index of the position in the DHT
+  * an int "SuccessorRequest" which is the index of the position in the DHT
     for which a successor should be found
   * a QString "Origin" which is the originID of whomever actually needs the
     response to the successor request
   * a quint16 "RequestPort" which is the port of the original requestor
-  * a Qstring "RequestHostAddress" which is the host address o the original
+  * a QString "RequestHostAddress" which is the host address o the original
     requestor
   * an int "FingerEntryNum" which is the entry in the requester's fingerTable
     for which the information would be stored
@@ -344,7 +343,7 @@ Message Types
   * a QString "SuccessorHostAddress" which is the host address of the successor
     node
   * an int "Predecessor" which is the index of the direct predecessor of the
-    return sucessor
+    return successor
   * an int "PredecessorPort" which is the port of the direct predecessor
   * a QString "PredecessorHostAddress" which is the host address of the direct
     predecessor
@@ -357,8 +356,8 @@ Message Types
   * an quint16 "PredecessorPort" containing the port of the predecessor
   * a QString "PredecessorHostAddress" containing the host address of the
     predecessor
-* an updateIndex QVariantMap that is called during the updateOthers() stop of 
-  DHT Join alerting other nodes of your existence containing the following 
+* an updateIndex QVariantMap that is called during the updateOthers() step of 
+  DHT Join to alert other nodes of your existence containing the following 
   fields:
   * an int "updatePort" containing your own port
   * a QString "updateHostAddress" containing your own host address;
