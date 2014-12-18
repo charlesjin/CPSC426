@@ -278,7 +278,7 @@ For Vanish, we adopted the following standards
 
 Message Types
 * a SecretShare QVariantMap message for distributing secret shares containing
-the following fields in addition to the usual direct message fields:
+  the following fields in addition to the usual direct message fields:
   * a monotonically increasing quint32 "SecretNo" field which is a locally
     maintained counter of the number of secrets distributed.
   * a quint16 "Threshold" field which is taken from the threshold scheme of
@@ -331,7 +331,7 @@ Message Types
   * a QString "Origin" which is the originID of whomever actually needs the
     response to the successor request
   * a quint16 "RequestPort" which is the port of the original requestor
-  * a QString "RequestHostAddress" which is the host address o the original
+  * a QString "RequestHostAddress" which is the host address of the original
     requestor
   * an int "FingerEntryNum" which is the entry in the requester's fingerTable
     for which the information would be stored
@@ -360,7 +360,7 @@ Message Types
   DHT Join to alert other nodes of your existence containing the following 
   fields:
   * an int "updatePort" containing your own port
-  * a QString "updateHostAddress" containing your own host address;
+  * a QString "updateHostAddress" containing your own host address
   * an int "updateValue" containing your own index
   * an int "updateIndex" containing the index in the DHT to update
   * an int "updateFingerIndex" containing the index of the finger table to
@@ -388,3 +388,4 @@ Message Types
 * a HeartbeatReply QVariantMap is always sent back to the sender of a
   HeartbeatRequest; it verifies that you are still alive
   * an int "HeartbeatReply" containing the default value 0
+
