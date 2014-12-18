@@ -24,7 +24,6 @@ ShamirSecret::~ShamirSecret()
 
 QList<QPair<qint16, qint64> > ShamirSecret::generateSecrets(qint32 secret, qint16 noPlayers, quint16 threshold)
 {
-  qDebug() << "scret is" << secret;
   QList<QPair<qint16, qint64> > response;
   if (noPlayers < threshold)
     return response;
@@ -61,7 +60,6 @@ qint32 ShamirSecret::solveSecret(QList<QPair<qint16, qint64> > points)
     }
     response += term;
   }
-  qDebug() << "secret is" << (qint32) round(response);
   return (qint32) round(response);
 }
 

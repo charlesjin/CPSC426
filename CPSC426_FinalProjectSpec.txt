@@ -180,6 +180,7 @@ DIVISION OF WORK
     Implement DHT remove and any functions related to a node’s death.
 
 -------------------------------------------------------------------------------
+
 PROPOSAL Part III As described on the course website, Part III was the merging
 of all previous parts and testing to ensure the system works as described in the
 proposal. The two-minute video was also made during this part. The video
@@ -250,4 +251,65 @@ certain individuals can reconstruct the secret.
 
 FIN
 
+-------------------------------------------------------------------------------
 
+SYSTEM SPECIFICATION
+
+Our system consists of two major components
+
+PART I Vanish + Shamir
+For Shamir, we adopted the following standards:
+* the polynomial has integer coefficients no greater than 1000
+
+For Vanish, we adopted the following standards
+* a randomly generated integer seed taken mod 1024 for determining where in the
+  DHT shares would be sprinkled
+* the algorithm for determining where shares are sprinkled with share[i] = 
+  (share[i-1] * 2038074133 + 48487) & sizeDHT with the first share using the seed
+  value
+* an initialization vector that was taken from the byte representation of the
+  seed as a string
+* a randomly generated integer key that was taken mod 1298831 (an arbitrarily
+  chosen large prime)
+* messages were encrypted using a symmetric key using aes128, cipher-block
+  chaining mode, QCA's default padding
+* secrets were assigned IDs by taking the originating node's originID and
+  direct concatenating with the SecretNo assigned by the originating node
+
+Message Types
+* a SecretShare QVariantMap message for distributing secret shares containing
+the following fields in addition to the usual direct message fields:
+  * a monotonically increasing quint32 "SecretNo" field which is a locally
+    maintained counter of the number of secrets distributed.
+  * a quint16 "Threshold" field which is taken from the threshold scheme of
+    shamir
+  * a qint32 "Seed" field which is the seed taken from Vanish
+  * a QString "Message" field which is the encrypted message
+  * a QPair "SecretShare" field which is the share as determined by Shamir
+    * the first element is the x value of your share as a qint16
+    * the second element is the value of the polynomial evaluated at x as a
+      qint64
+* a SecretRequest QVariantMap message for requesting back secret shares
+  containing the following fields in addition to the usual direct message
+  fields:
+  * a QString "SecretRequest" field which is the requested secret's secretID
+* a SecretReply QVariantMap message for sending back secret shares containing
+  the following fields in addition to the usual direct message fields:
+  * a QString "SecretReply" field which is the secretID for which you are
+    sending info
+  * a qint16 "x" field which is the x value of your share
+  * a qint64 "fx" field which is the f(x) value of your share
+
+PART II DHT
+
+JoinDHTRequest
+SuccessorRequest
+SuccessorResponse
+UpdatePredecessor
+updateIndex
+StoredPredecessorRequest
+StoredPredecessorResponse
+
+Notify
+HeartbeatRequest
+HeartbeatReply

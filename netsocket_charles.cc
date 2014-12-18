@@ -124,7 +124,7 @@ void NetSocket::recoverSecret(QString secretID)
 {
   if (secrets.contains(secretID)){
     QMap<QString, QVariant> shareMap;
-    QMap<QString, QVariant>  secret = secrets[secretID];
+    QMap<QString, QVariant> secret = secrets[secretID];
     shareMap.insert("SecretReply", secretID);
     shareMap.insert("x", secret["x"]);
     shareMap.insert("fx", secret["fx"]);
