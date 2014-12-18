@@ -318,6 +318,7 @@ For our implementation of Chord, we adopted the following standards:
   with the information directly. Thus every message contains the originator's
   host and port information, in addition to auxilliary fields that will help
   the originator determine how to use the information returned to it.
+* mark nodes as failed by setting theit host address field to QHostAddress()
 
 Message Types
 * a JoinDHTRequest QVariantMap for requesting to join the existing DHT
@@ -365,9 +366,26 @@ Message Types
   * an int "updateIndex" containing the index in the DHT to update
   * an int "updateFingerIndex" containing the index of the finger table to
     update
-
-StoredPredecessorRequest
-StoredPredecessorResponse
-Notify
-HeartbeatRequest
-HeartbeatReply
+* a StoredPredecessorRequest QVariantMap for asking a node which node they
+  have stored as their predecessor containing the following fields:
+  * an int "StoredPredecessorRequest" containing your own index
+* a StoredPredecessorResponse QVariantMap is a response to a 
+  StoredPredecessorRequest and contains information about the node's stored
+  predecessor
+  * an int "StoredPredecessorResponse" containing the stored predecessor's index
+  * an int "StoredPredecessorPort" containing the stored predecessor's port
+  * a QString "StoredPredecessorHostAddress" containing the host address of the
+    stored predecessor
+* a Notify QVariantMap that you send to your successor periodically to notify
+  it of your existence, so that it may update its predecessor to you if 
+  necessary
+  * an int "Notify" containing your own index
+  * an int "SenderPort" containing your own port
+  * a QString "SenderHostAddress" containing your own host address
+* a HeartbeatRequest QVariantMap is a request that you send periodically to your
+  predecessor; recipients should respond with a HeartbeatReply; if you do not
+  receive a HeartbeatResponse in response, assume that the node has failed
+  * an int "HeartbeatRequest" containing the default value 0
+* a HeartbeatReply QVariantMap is always sent back to the sender of a
+  HeartbeatRequest; it verifies that you are still alive
+  * an int "HeartbeatReply" containing the default value 0
